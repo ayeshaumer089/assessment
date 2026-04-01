@@ -25,7 +25,14 @@ cd Backend
 npm install
 ```
 
-### 2) Run the apps
+### 2) Configure backend env
+
+Create `Backend/.env` and copy values from `Backend/ENV_EXAMPLE.txt`.
+
+MongoDB Atlas URI format used in this project:
+`mongodb+srv://t94531856_db_user:<db_password>@cluster0.ntqpp3b.mongodb.net/assessment_db?retryWrites=true&w=majority&appName=Cluster0`
+
+### 3) Run the apps
 
 Frontend dev server:
 ```bash

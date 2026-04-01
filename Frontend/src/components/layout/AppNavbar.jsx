@@ -1,6 +1,28 @@
 import React from 'react';
+import { logout } from '../../services/auth';
 
-const AppNavbar = ({ activeTab, setActiveTab, goHome, openModal, currentModelId }) => {
+const AppNavbar = ({ activeTab, setActiveTab, goHome, goSignIn, isAuthenticated, onLogout, openModal, currentModelId }) => {
+  const handleLogout = async () => {
+    const token = localStorage.getItem('authToken');
+    try {
+      if (token) {
+        await logout(token);
+      }
+    } catch (_error) {
+      // Frontend still signs out locally even if API call fails.
+    } finally {
+      onLogout();
+    }
+  };
+
+  const handleAuthAction = () => {
+    if (isAuthenticated) {
+      handleLogout();
+      return;
+    }
+    goSignIn();
+  };
+
   return (
     <div className="app-nav">
       <div className="logo" style={{ fontSize: '1.1rem' }} onClick={goHome}>
@@ -38,7 +60,9 @@ const AppNavbar = ({ activeTab, setActiveTab, goHome, openModal, currentModelId 
         </button>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <button className="btn btn-ghost" style={{ padding: '0.4rem 0.9rem', fontSize: '0.8rem' }}>Sign in</button>
+        <button className="btn btn-ghost" style={{ padding: '0.4rem 0.9rem', fontSize: '0.8rem' }} onClick={handleAuthAction}>
+          {isAuthenticated ? 'Logout' : 'Sign in'}
+        </button>
         <button className="btn btn-primary" style={{ padding: '0.4rem 0.9rem', fontSize: '0.8rem' }} onClick={() => openModal(currentModelId)}>Try free →</button>
       </div>
     </div>

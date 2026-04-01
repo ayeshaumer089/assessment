@@ -3,7 +3,7 @@ import { MODELS, MODEL_VARS } from '../../constants';
 import Sidebar from './Sidebar';
 import RightPanel from './RightPanel';
 
-const ChatHub = ({ searchQuery, setSearchQuery, currentModelId, setCurrentModelId, isObDone, onboardingAnswers }) => {
+const ChatHub = ({ models = [], searchQuery, setSearchQuery, currentModelId, setCurrentModelId, isObDone, onboardingAnswers }) => {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -16,8 +16,11 @@ const ChatHub = ({ searchQuery, setSearchQuery, currentModelId, setCurrentModelI
   const chatEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const recognitionRef = useRef(null);
+  const lastAutoQueryRef = useRef('');
+  const lastSentRef = useRef({ content: '', at: 0 });
 
-  const activeModel = MODELS.find(m => m.id === currentModelId) || MODELS[0];
+  const modelsData = models.length > 0 ? models : MODELS;
+  const activeModel = modelsData.find(m => m.id === currentModelId) || modelsData[0];
 
   const CPANEL_DATA = {
     use_cases: ['Help me find the best AI model for my project', 'I want to build an AI chatbot for my website', 'Generate realistic images for my marketing campaign', 'Analyse documents and extract key information', 'Create AI agents for workflow automation', 'Add voice and speech recognition to my app'],
@@ -91,11 +94,54 @@ const ChatHub = ({ searchQuery, setSearchQuery, currentModelId, setCurrentModelI
     fileInputRef.current?.click();
   };
 
-  useEffect(() => {
-    if (searchQuery) {
-      handleSend(searchQuery);
-      setSearchQuery('');
+  const mapHomeQueryToGoal = (query) => {
+    const q = query.toLowerCase();
+    if (q.includes('image') || q.includes('design') || q.includes('art')) {
+      return { label: 'Create an image for me', icon: '🎨' };
     }
+    if (q.includes('video')) {
+      return { label: 'Create video', icon: '🎬' };
+    }
+    if (q.includes('audio') || q.includes('voice') || q.includes('music')) {
+      return { label: 'Generate audio', icon: '🎵' };
+    }
+    if (q.includes('slide') || q.includes('presentation')) {
+      return { label: 'Create slides', icon: '📊' };
+    }
+    if (q.includes('analy') || q.includes('data')) {
+      return { label: 'Analyse data', icon: '📊' };
+    }
+    if (q.includes('code') || q.includes('build') || q.includes('app')) {
+      return { label: 'Build something', icon: '🛠️' };
+    }
+    if (q.includes('translate')) {
+      return { label: 'Write content', icon: '✍️' };
+    }
+    if (q.includes('explore')) {
+      return { label: 'Just exploring', icon: '🔍' };
+    }
+    return null;
+  };
+
+  useEffect(() => {
+    if (!searchQuery) return;
+    const normalized = searchQuery.trim();
+    if (!normalized) {
+      setSearchQuery('');
+      return;
+    }
+    if (lastAutoQueryRef.current === normalized) {
+      return;
+    }
+
+    lastAutoQueryRef.current = normalized;
+    const mappedGoal = mapHomeQueryToGoal(normalized);
+    if (mappedGoal && messages.length === 0) {
+      onboardPick('goal', mappedGoal.label, mappedGoal.icon);
+    } else {
+      handleSend(normalized);
+    }
+    setSearchQuery('');
   }, [searchQuery]);
 
   useEffect(() => {
@@ -105,8 +151,19 @@ const ChatHub = ({ searchQuery, setSearchQuery, currentModelId, setCurrentModelI
   const handleSend = (text) => {
     const val = text || inputValue;
     if (!val.trim()) return;
+    const normalized = val.trim();
+    const now = Date.now();
+
+    // Prevent accidental duplicate sends (e.g., strict-mode/effect double trigger).
+    if (
+      lastSentRef.current.content === normalized &&
+      now - lastSentRef.current.at < 1000
+    ) {
+      return;
+    }
+    lastSentRef.current = { content: normalized, at: now };
     
-    setMessages(prev => [...prev, { role: 'user', content: val }]);
+    setMessages(prev => [...prev, { role: 'user', content: normalized }]);
     setInputValue('');
     setIsTyping(true);
     setShowCPanel(false);
@@ -199,7 +256,7 @@ const ChatHub = ({ searchQuery, setSearchQuery, currentModelId, setCurrentModelI
 
   return (
     <div id="chat-view" style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-      <Sidebar currentModelId={currentModelId} setCurrentModelId={setCurrentModelId} />
+      <Sidebar models={modelsData} currentModelId={currentModelId} setCurrentModelId={setCurrentModelId} />
 
       <main className="central">
         <div className="chat-area">
@@ -308,33 +365,12 @@ const ChatHub = ({ searchQuery, setSearchQuery, currentModelId, setCurrentModelI
             </div>
           )}
 
-          {showCPanel && (
-            <div className="cpanel">
-              <div className="cpanel-tabs">
-                {Object.keys(CPANEL_DATA).map(cat => (
-                  <button 
-                    key={cat} 
-                    className={`cpanel-tab ${activeCategory === cat ? 'active' : ''}`}
-                    onClick={() => setActiveCategory(cat)}
-                  >
-                    {cat.replace('_', ' ').charAt(0).toUpperCase() + cat.replace('_', ' ').slice(1)}
-                  </button>
-                ))}
-              </div>
-              <div className="cpanel-prompts">
-                {CPANEL_DATA[activeCategory].map((p, i) => (
-                  <button key={i} className="cpanel-prompt" onClick={() => handleSend(p)}>{p}</button>
-                ))}
-              </div>
-            </div>
-          )}
-          
           <div className="inp-row">
-            <div className="inp-wrap">
+            <div className="inp-wrap inp-wrap-hero">
               <textarea 
                 id="chat-input" 
-                rows="1" 
-                placeholder="Click here and type anything — or just say hi! 👋"
+                rows="2" 
+                placeholder="Describe your project, ask a question, or just say hi - I'm here to help..."
                 value={inputValue}
                 onFocus={() => setShowCPanel(true)}
                 onChange={(e) => setInputValue(e.target.value)}
@@ -350,6 +386,21 @@ const ChatHub = ({ searchQuery, setSearchQuery, currentModelId, setCurrentModelI
                     <path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/>
                     <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
                     <line x1="12" y1="19" x2="12" y2="22"/>
+                  </svg>
+                </button>
+                <button className="inp-icon-btn" title="Tools">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 2v20M2 12h20"/>
+                  </svg>
+                </button>
+                <button className="inp-icon-btn" title="Video">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3z"/>
+                  </svg>
+                </button>
+                <button className="inp-icon-btn" title="Screen">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
                   </svg>
                 </button>
                 <button 
@@ -369,7 +420,7 @@ const ChatHub = ({ searchQuery, setSearchQuery, currentModelId, setCurrentModelI
                   onChange={handleFileAttach}
                 />
                 <div className="model-sel">
-                  <span>Using {activeModel.name}</span>
+                  <span>{activeModel.name || 'GPT-5'}</span>
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="m6 9 6 6 6-6"/></svg>
                 </div>
               </div>
@@ -380,6 +431,27 @@ const ChatHub = ({ searchQuery, setSearchQuery, currentModelId, setCurrentModelI
               </svg>
             </button>
           </div>
+
+          {showCPanel && (
+            <div className="cpanel">
+              <div className="cpanel-tabs">
+                {Object.keys(CPANEL_DATA).map(cat => (
+                  <button
+                    key={cat}
+                    className={`cpanel-tab ${activeCategory === cat ? 'active' : ''}`}
+                    onClick={() => setActiveCategory(cat)}
+                  >
+                    {cat.replace('_', ' ').charAt(0).toUpperCase() + cat.replace('_', ' ').slice(1)}
+                  </button>
+                ))}
+              </div>
+              <div className="cpanel-prompts">
+                {CPANEL_DATA[activeCategory].map((p, i) => (
+                  <button key={i} className="cpanel-prompt" onClick={() => handleSend(p)}>{p}</button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </main>
 

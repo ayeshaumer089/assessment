@@ -1,0 +1,995 @@
+[
+  {
+    "id": "gpt5",
+    "icon": "🧠",
+    "bg": "#F0F9FF",
+    "name": "GPT-5.4 Omni",
+    "lab": "OpenAI",
+    "org": "OpenAI",
+    "desc": "Native computer-use agents, improved reasoning, 1M+ context window. The new frontier of general intelligence.",
+    "tags": [
+      "Language",
+      "Vision",
+      "Audio",
+      "Computer Use"
+    ],
+    "badge": "hot",
+    "badgeClass": "badge-hot",
+    "rating": 4.9,
+    "reviews": 1240,
+    "price": "$2.50/1M tk",
+    "types": [
+      "language",
+      "vision",
+      "audio",
+      "agents"
+    ],
+    "price_start": 2.5
+  },
+  {
+    "id": "gpt-o1",
+    "icon": "🧪",
+    "bg": "#F0F9FF",
+    "name": "GPT-o1-preview",
+    "lab": "OpenAI",
+    "org": "OpenAI",
+    "desc": "Advanced reasoning for complex math and coding. Thinking before answering for higher accuracy.",
+    "tags": [
+      "Reasoning",
+      "Math",
+      "Coding"
+    ],
+    "badge": "",
+    "badgeClass": "",
+    "rating": 4.8,
+    "reviews": 820,
+    "price": "$15/1M tk",
+    "types": [
+      "language",
+      "code"
+    ],
+    "price_start": 15
+  },
+  {
+    "id": "gpt4o",
+    "icon": "⚡",
+    "bg": "#F0F9FF",
+    "name": "GPT-4o",
+    "lab": "OpenAI",
+    "org": "OpenAI",
+    "desc": "Fast, multimodal flagship model. Perfect for real-time interaction and high-quality creative work.",
+    "tags": [
+      "Fast",
+      "Multimodal",
+      "Vision"
+    ],
+    "badge": "",
+    "badgeClass": "",
+    "rating": 4.7,
+    "reviews": 3400,
+    "price": "$5/1M tk",
+    "types": [
+      "language",
+      "vision",
+      "audio"
+    ],
+    "price_start": 5
+  },
+  {
+    "id": "gpt-image",
+    "icon": "🖼",
+    "bg": "#F0F9FF",
+    "name": "DALL·E 3",
+    "lab": "OpenAI",
+    "org": "OpenAI",
+    "desc": "The most advanced image generation model. Unparalleled adherence to complex prompts and text.",
+    "tags": [
+      "Image Gen",
+      "DALL·E",
+      "Creative"
+    ],
+    "badge": "",
+    "badgeClass": "",
+    "rating": 4.6,
+    "reviews": 1800,
+    "price": "$0.04/img",
+    "types": [
+      "image_gen"
+    ],
+    "price_start": 8
+  },
+  {
+    "id": "sora2",
+    "icon": "🎬",
+    "bg": "#F0F9FF",
+    "name": "Sora 2.0",
+    "lab": "OpenAI",
+    "org": "OpenAI",
+    "desc": "Generate high-fidelity videos up to 1 minute from text prompts. Physics-aware cinematic world modeling.",
+    "tags": [
+      "Video Gen",
+      "Cinematic",
+      "Physics"
+    ],
+    "badge": "new",
+    "badgeClass": "badge-new",
+    "rating": 4.9,
+    "reviews": 420,
+    "price": "$30/1M tk",
+    "types": [
+      "video"
+    ],
+    "price_start": 30
+  },
+  {
+    "id": "claude-opus",
+    "icon": "👑",
+    "bg": "#FDF2F0",
+    "name": "Claude 3.7 Opus",
+    "lab": "Anthropic",
+    "org": "Anthropic",
+    "desc": "Anthropic flagship — most intelligent, nuanced, and best at complex coding and agentic tasks.",
+    "tags": [
+      "Intelligence",
+      "Coding",
+      "Agents"
+    ],
+    "badge": "hot",
+    "badgeClass": "badge-hot",
+    "rating": 4.9,
+    "reviews": 1100,
+    "price": "$15/1M tk",
+    "types": [
+      "language",
+      "code",
+      "agents"
+    ],
+    "price_start": 15
+  },
+  {
+    "id": "claude-sonnet",
+    "icon": "⚡",
+    "bg": "#FDF2F0",
+    "name": "Claude 3.7 Sonnet",
+    "lab": "Anthropic",
+    "org": "Anthropic",
+    "desc": "Best balance of speed and intelligence. Adaptive Thinking mode and computer-use support.",
+    "tags": [
+      "Balanced",
+      "Fast",
+      "Adaptive"
+    ],
+    "badge": "new",
+    "badgeClass": "badge-new",
+    "rating": 4.8,
+    "reviews": 2600,
+    "price": "$3/1M tk",
+    "types": [
+      "language",
+      "vision",
+      "code",
+      "agents"
+    ],
+    "price_start": 3
+  },
+  {
+    "id": "claude-haiku",
+    "icon": "🚀",
+    "bg": "#FDF2F0",
+    "name": "Claude 3.5 Haiku",
+    "lab": "Anthropic",
+    "org": "Anthropic",
+    "desc": "Near-frontier intelligence at sub-second speeds. The best value for high-volume tasks.",
+    "tags": [
+      "Fast",
+      "Cheap",
+      "High Volume"
+    ],
+    "badge": "",
+    "badgeClass": "",
+    "rating": 4.5,
+    "reviews": 1800,
+    "price": "$0.25/1M tk",
+    "types": [
+      "language",
+      "code"
+    ],
+    "price_start": 0.25
+  },
+  {
+    "id": "gemini31-pro",
+    "icon": "🔬",
+    "bg": "#F0F4FF",
+    "name": "Gemini 3.1 Pro",
+    "lab": "Google",
+    "org": "Google DeepMind",
+    "desc": "Up to 5M context window. Unparalleled for deep reasoning across massive datasets and long videos.",
+    "tags": [
+      "5M Context",
+      "Reasoning",
+      "Multimodal"
+    ],
+    "badge": "hot",
+    "badgeClass": "badge-hot",
+    "rating": 4.8,
+    "reviews": 920,
+    "price": "$1.25/1M tk",
+    "types": [
+      "language",
+      "vision",
+      "audio",
+      "video"
+    ],
+    "price_start": 1.25
+  },
+  {
+    "id": "gemini3-flash",
+    "icon": "⚡",
+    "bg": "#F0F4FF",
+    "name": "Gemini 3 Flash",
+    "lab": "Google",
+    "org": "Google DeepMind",
+    "desc": "Ultra-fast, high-volume model with 1M context. Perfect for real-time RAG and agentic workflows.",
+    "tags": [
+      "1M Context",
+      "Real-time",
+      "RAG"
+    ],
+    "badge": "",
+    "badgeClass": "",
+    "rating": 4.6,
+    "reviews": 1500,
+    "price": "$0.10/1M tk",
+    "types": [
+      "language",
+      "vision",
+      "code"
+    ],
+    "price_start": 0.1
+  },
+  {
+    "id": "gemini31-flash-lite",
+    "icon": "💡",
+    "bg": "#F0F4FF",
+    "name": "Gemini 3.1 Flash-Lite",
+    "lab": "Google",
+    "org": "Google DeepMind",
+    "desc": "Ultra-low cost model with Thinking Mode for smarter responses in simple tasks.",
+    "tags": [
+      "Ultra Cheap",
+      "Thinking Mode"
+    ],
+    "badge": "new",
+    "badgeClass": "badge-new",
+    "rating": 4.4,
+    "reviews": 680,
+    "price": "$0.05/1M tk",
+    "types": [
+      "language"
+    ],
+    "price_start": 0.05
+  },
+  {
+    "id": "veo3",
+    "icon": "🎥",
+    "bg": "#F0F4FF",
+    "name": "Veo 3.1",
+    "lab": "Google",
+    "org": "Google DeepMind",
+    "desc": "Professional video generation with cinematic camera control and physics-aware rendering.",
+    "tags": [
+      "Video Gen",
+      "Cinematic",
+      "Physics"
+    ],
+    "badge": "",
+    "badgeClass": "",
+    "rating": 4.7,
+    "reviews": 310,
+    "price": "$0.50/sec",
+    "types": [
+      "video"
+    ],
+    "price_start": 0.5
+  },
+  {
+    "id": "grok4",
+    "icon": "𝕏",
+    "bg": "#F5F5F5",
+    "name": "Grok-4-1",
+    "lab": "xAI",
+    "org": "xAI",
+    "desc": "Real-time X data access with a 4-agent architecture for enhanced reasoning and truth-seeking.",
+    "tags": [
+      "Real-time X",
+      "4-Agent",
+      "Truth"
+    ],
+    "badge": "hot",
+    "badgeClass": "badge-hot",
+    "rating": 4.7,
+    "reviews": 740,
+    "price": "$0.50/1M tk",
+    "types": [
+      "language",
+      "agents"
+    ],
+    "price_start": 0.5
+  },
+  {
+    "id": "deepseek-v3",
+    "icon": "💻",
+    "bg": "#F0F9FF",
+    "name": "DeepSeek-V3",
+    "lab": "DeepSeek",
+    "org": "DeepSeek",
+    "desc": "Flagship open-source MoE. Beats GPT-4o on many benchmarks at a fraction of the cost.",
+    "tags": [
+      "Open Weights",
+      "MoE",
+      "SOTA"
+    ],
+    "badge": "hot",
+    "badgeClass": "badge-hot",
+    "rating": 4.8,
+    "reviews": 1600,
+    "price": "$0.14/1M tk",
+    "types": [
+      "language",
+      "code",
+      "open"
+    ],
+    "price_start": 0.14
+  },
+  {
+    "id": "deepseek-v32",
+    "icon": "🧪",
+    "bg": "#F0F9FF",
+    "name": "DeepSeek-V3.2",
+    "lab": "DeepSeek",
+    "org": "DeepSeek",
+    "desc": "Optimised variant with Sparse Attention for even faster and cheaper inference.",
+    "tags": [
+      "Fast",
+      "Sparse Attention"
+    ],
+    "badge": "new",
+    "badgeClass": "badge-new",
+    "rating": 4.7,
+    "reviews": 420,
+    "price": "$0.08/1M tk",
+    "types": [
+      "language",
+      "code",
+      "open"
+    ],
+    "price_start": 0.08
+  },
+  {
+    "id": "deepseek-r1",
+    "icon": "🔬",
+    "bg": "#F0F9FF",
+    "name": "DeepSeek-R1",
+    "lab": "DeepSeek",
+    "org": "DeepSeek",
+    "desc": "Specialised reasoning model using RL. Unparalleled for academic math and formal proofs.",
+    "tags": [
+      "Reasoning",
+      "Math",
+      "Academic"
+    ],
+    "badge": "open",
+    "badgeClass": "badge-open",
+    "rating": 4.9,
+    "reviews": 890,
+    "price": "$0.50/1M tk",
+    "types": [
+      "language",
+      "code",
+      "open"
+    ],
+    "price_start": 0.5
+  },
+  {
+    "id": "llama4-maverick",
+    "icon": "🦙",
+    "bg": "#F0F7FF",
+    "name": "Llama 4 Maverick",
+    "lab": "Meta",
+    "org": "Meta AI",
+    "desc": "400B parameter open-weights flagship. Natively multimodal and multilingual (119 languages).",
+    "tags": [
+      "Open Source",
+      "400B",
+      "Multimodal"
+    ],
+    "badge": "hot",
+    "badgeClass": "badge-hot",
+    "rating": 4.8,
+    "reviews": 2200,
+    "price": "Free (self-host)",
+    "types": [
+      "language",
+      "vision",
+      "code",
+      "open"
+    ],
+    "price_start": 0
+  },
+  {
+    "id": "llama4-scout",
+    "icon": "🌟",
+    "bg": "#F0F7FF",
+    "name": "Llama 4 Scout",
+    "lab": "Meta",
+    "org": "Meta AI",
+    "desc": "Efficient MoE architecture with 128K context window. Perfect for retrieval and summarisation.",
+    "tags": [
+      "Efficient",
+      "MoE",
+      "Long Context"
+    ],
+    "badge": "",
+    "badgeClass": "",
+    "rating": 4.6,
+    "reviews": 1300,
+    "price": "Free (self-host)",
+    "types": [
+      "language",
+      "open"
+    ],
+    "price_start": 0
+  },
+  {
+    "id": "qwen3-max",
+    "icon": "🀄",
+    "bg": "#F5F0FF",
+    "name": "Qwen3-Max",
+    "lab": "Alibaba Cloud",
+    "org": "Alibaba Qwen",
+    "desc": "1T parameter MoE. The leading model for multilingual APAC scale and enterprise apps.",
+    "tags": [
+      "1T Params",
+      "Multilingual",
+      "APAC"
+    ],
+    "badge": "hot",
+    "badgeClass": "badge-hot",
+    "rating": 4.7,
+    "reviews": 980,
+    "price": "$1.20/1M tk",
+    "types": [
+      "language",
+      "vision",
+      "code"
+    ],
+    "price_start": 1.2
+  },
+  {
+    "id": "qwen3-coder",
+    "icon": "💡",
+    "bg": "#F5F0FF",
+    "name": "Qwen3-Coder",
+    "lab": "Alibaba Cloud",
+    "org": "Alibaba Qwen",
+    "desc": "480B MoE coding specialist. Outperforms many frontier models in professional software tasks.",
+    "tags": [
+      "Coding",
+      "Specialist",
+      "480B"
+    ],
+    "badge": "",
+    "badgeClass": "",
+    "rating": 4.8,
+    "reviews": 760,
+    "price": "$0.90/1M tk",
+    "types": [
+      "code"
+    ],
+    "price_start": 0.9
+  },
+  {
+    "id": "devstral",
+    "icon": "🌀",
+    "bg": "#F0FFF4",
+    "name": "Devstral 2",
+    "lab": "Mistral AI",
+    "org": "Mistral AI",
+    "desc": "The fastest coding agent on the market. 256K context for large-scale codebase refactoring.",
+    "tags": [
+      "Coding Agent",
+      "256K",
+      "Fastest"
+    ],
+    "badge": "new",
+    "badgeClass": "badge-new",
+    "rating": 4.8,
+    "reviews": 450,
+    "price": "$2/1M tk",
+    "types": [
+      "code",
+      "agents"
+    ],
+    "price_start": 2
+  },
+  {
+    "id": "mistral-medium",
+    "icon": "⚙️",
+    "bg": "#F0FFF4",
+    "name": "Mistral Medium 3.1",
+    "lab": "Mistral AI",
+    "org": "Mistral AI",
+    "desc": "Balanced enterprise model. Great for document Q&A, structured outputs, and agent tools.",
+    "tags": [
+      "Enterprise",
+      "Balanced",
+      "DPA"
+    ],
+    "badge": "",
+    "badgeClass": "",
+    "rating": 4.6,
+    "reviews": 1100,
+    "price": "$0.30/1M tk",
+    "types": [
+      "language",
+      "agents"
+    ],
+    "price_start": 0.3
+  },
+  {
+    "id": "nemotron-ultra",
+    "icon": "🟢",
+    "bg": "#F0FFF0",
+    "name": "Nemotron Ultra 253B",
+    "lab": "NVIDIA",
+    "org": "NVIDIA",
+    "desc": "NAS-compressed enterprise RAG model. Optimised for NVIDIA hardware and real-time reasoning.",
+    "tags": [
+      "RAG",
+      "Enterprise",
+      "NVIDIA"
+    ],
+    "badge": "",
+    "badgeClass": "",
+    "rating": 4.7,
+    "reviews": 540,
+    "price": "$1.80/1M tk",
+    "types": [
+      "language"
+    ],
+    "price_start": 1.8
+  },
+  {
+    "id": "nemotron-nano",
+    "icon": "📷",
+    "bg": "#F0FFF0",
+    "name": "Nemotron Nano 2 VL",
+    "lab": "NVIDIA",
+    "org": "NVIDIA",
+    "desc": "Video and document understanding for edge and mobile. Efficient Mamba-Transformer architecture.",
+    "tags": [
+      "Vision",
+      "Edge",
+      "Video"
+    ],
+    "badge": "",
+    "badgeClass": "",
+    "rating": 4.5,
+    "reviews": 320,
+    "price": "$0.20/1M tk",
+    "types": [
+      "vision"
+    ],
+    "price_start": 0.2
+  },
+  {
+    "id": "glm5",
+    "icon": "🔷",
+    "bg": "#F0F4FF",
+    "name": "GLM-5",
+    "lab": "Zhipu AI",
+    "org": "Zhipu AI",
+    "desc": "The fastest agentic engineering model. Sparse Attention architecture for sub-second coding.",
+    "tags": [
+      "Fastest",
+      "Agents",
+      "Coding"
+    ],
+    "badge": "hot",
+    "badgeClass": "badge-hot",
+    "rating": 4.8,
+    "reviews": 620,
+    "price": "$3.20/1M tk",
+    "types": [
+      "language",
+      "code",
+      "agents"
+    ],
+    "price_start": 3.2
+  },
+  {
+    "id": "kimi-k2",
+    "icon": "🌙",
+    "bg": "#F5F5FF",
+    "name": "Kimi-k2.5",
+    "lab": "Moonshot AI",
+    "org": "Moonshot AI",
+    "desc": "Agent Swarm Orchestration with 262K context. Leading model for visual coding and RAG.",
+    "tags": [
+      "Agent Swarm",
+      "262K",
+      "Visual"
+    ],
+    "badge": "new",
+    "badgeClass": "badge-new",
+    "rating": 4.7,
+    "reviews": 410,
+    "price": "$3/1M tk",
+    "types": [
+      "language",
+      "vision",
+      "agents"
+    ],
+    "price_start": 3
+  },
+  {
+    "id": "pythia-12b",
+    "icon": "⚡",
+    "bg": "#FFF9E8",
+    "name": "Pythia 12B",
+    "lab": "EleutherAI",
+    "org": "EleutherAI",
+    "desc": "Research-first open model with full training transparency and checkpoints.",
+    "tags": [
+      "Open Source",
+      "Research",
+      "Transparent"
+    ],
+    "badge": "open",
+    "badgeClass": "badge-open",
+    "rating": 4,
+    "reviews": 340,
+    "price": "Free (open)",
+    "types": [
+      "language",
+      "open"
+    ],
+    "price_start": 0
+  },
+  {
+    "id": "pythia-69b",
+    "icon": "⚡",
+    "bg": "#FFF9E8",
+    "name": "Pythia 6.9B",
+    "lab": "EleutherAI",
+    "org": "EleutherAI",
+    "desc": "Balanced Pythia model for NLP research with full checkpoint access.",
+    "tags": [
+      "Research",
+      "NLP",
+      "Checkpoints"
+    ],
+    "badge": "open",
+    "badgeClass": "badge-open",
+    "rating": 3.9,
+    "reviews": 420,
+    "price": "Free (open)",
+    "types": [
+      "language",
+      "open"
+    ],
+    "price_start": 0
+  },
+  {
+    "id": "pythia-28b",
+    "icon": "🔹",
+    "bg": "#FFF9E8",
+    "name": "Pythia 2.8B",
+    "lab": "EleutherAI",
+    "org": "EleutherAI",
+    "desc": "Compact research model for analysis, fine-tuning experiments, and education.",
+    "tags": [
+      "Compact",
+      "Fine-Tuning",
+      "Education"
+    ],
+    "badge": "open",
+    "badgeClass": "badge-open",
+    "rating": 3.8,
+    "reviews": 560,
+    "price": "Free (open)",
+    "types": [
+      "language",
+      "open"
+    ],
+    "price_start": 0
+  },
+  {
+    "id": "bloom",
+    "icon": "🌍",
+    "bg": "#FFF0F8",
+    "name": "BLOOM",
+    "lab": "BigScience",
+    "org": "BigScience",
+    "desc": "176B multilingual open model trained on 46 languages and 13 programming languages.",
+    "tags": [
+      "Open Source",
+      "176B",
+      "Multilingual",
+      "46 Languages"
+    ],
+    "badge": "open",
+    "badgeClass": "badge-open",
+    "rating": 4,
+    "reviews": 760,
+    "price": "Free (open)",
+    "types": [
+      "language",
+      "code",
+      "open"
+    ],
+    "price_start": 0
+  },
+  {
+    "id": "bloomz",
+    "icon": "🌍",
+    "bg": "#FFF0F8",
+    "name": "BLOOMZ",
+    "lab": "BigScience",
+    "org": "BigScience",
+    "desc": "Instruction-tuned BLOOM for multilingual task completion.",
+    "tags": [
+      "Open Source",
+      "Instruction",
+      "Multilingual"
+    ],
+    "badge": "open",
+    "badgeClass": "badge-open",
+    "rating": 4,
+    "reviews": 580,
+    "price": "Free (open)",
+    "types": [
+      "language",
+      "open"
+    ],
+    "price_start": 0
+  },
+  {
+    "id": "minimax-m25",
+    "icon": "🟡",
+    "bg": "#FFFDE8",
+    "name": "MiniMax-M2.5",
+    "lab": "MiniMax",
+    "org": "MiniMax",
+    "desc": "Advanced Chinese multimodal model with agent orchestration capabilities.",
+    "tags": [
+      "Chinese",
+      "Multimodal",
+      "Agents"
+    ],
+    "badge": "new",
+    "badgeClass": "badge-new",
+    "rating": 4.3,
+    "reviews": 280,
+    "price": "$0.40/1M tk",
+    "types": [
+      "language",
+      "vision"
+    ],
+    "price_start": 0.4
+  },
+  {
+    "id": "minimax-m1",
+    "icon": "🟡",
+    "bg": "#FFFDE8",
+    "name": "MiniMax-M1",
+    "lab": "MiniMax",
+    "org": "MiniMax",
+    "desc": "Efficient long-context model for Chinese enterprise and consumer apps.",
+    "tags": [
+      "Long Context",
+      "Chinese",
+      "Enterprise"
+    ],
+    "badge": "",
+    "badgeClass": "",
+    "rating": 4.1,
+    "reviews": 420,
+    "price": "$0.20/1M tk",
+    "types": [
+      "language"
+    ],
+    "price_start": 0.2
+  },
+  {
+    "id": "hunyuan-large",
+    "icon": "🐧",
+    "bg": "#E8F8FF",
+    "name": "Hunyuan Large",
+    "lab": "Tencent",
+    "org": "Tencent",
+    "desc": "Tencent flagship MoE — Chinese-English, multimodal, and coding.",
+    "tags": [
+      "Chinese",
+      "MoE",
+      "Multimodal",
+      "Coding"
+    ],
+    "badge": "new",
+    "badgeClass": "badge-new",
+    "rating": 4.3,
+    "reviews": 320,
+    "price": "¥0.05/1K tk",
+    "types": [
+      "language",
+      "vision",
+      "code"
+    ],
+    "price_start": 0.3
+  },
+  {
+    "id": "hunyuan-turbo",
+    "icon": "🐧",
+    "bg": "#E8F8FF",
+    "name": "Hunyuan Turbo",
+    "lab": "Tencent",
+    "org": "Tencent",
+    "desc": "Fast Hunyuan variant for real-time chat and content generation.",
+    "tags": [
+      "Fast",
+      "Chat",
+      "Real-time"
+    ],
+    "badge": "",
+    "badgeClass": "",
+    "rating": 4.1,
+    "reviews": 480,
+    "price": "¥0.03/1K tk",
+    "types": [
+      "language"
+    ],
+    "price_start": 0.15
+  },
+  {
+    "id": "zephyr",
+    "icon": "🤗",
+    "bg": "#FFF7E8",
+    "name": "H4-Zephyr",
+    "lab": "HuggingFace",
+    "org": "HuggingFace",
+    "desc": "Fine-tuned Mistral model for helpfulness without RLHF. Top for open chat.",
+    "tags": [
+      "Open Source",
+      "Chat",
+      "Fine-Tuned"
+    ],
+    "badge": "open",
+    "badgeClass": "badge-open",
+    "rating": 4.2,
+    "reviews": 980,
+    "price": "Free (open)",
+    "types": [
+      "language",
+      "open"
+    ],
+    "price_start": 0
+  },
+  {
+    "id": "openchat",
+    "icon": "🤗",
+    "bg": "#FFF7E8",
+    "name": "H4-OpenChat",
+    "lab": "HuggingFace",
+    "org": "HuggingFace",
+    "desc": "Community-curated open chat model with strong helpfulness scores.",
+    "tags": [
+      "Open Source",
+      "Community",
+      "Helpfulness"
+    ],
+    "badge": "open",
+    "badgeClass": "badge-open",
+    "rating": 4.1,
+    "reviews": 720,
+    "price": "Free (open)",
+    "types": [
+      "language",
+      "open"
+    ],
+    "price_start": 0
+  },
+  {
+    "id": "cerebras-111m",
+    "icon": "🧠",
+    "bg": "#FEE8EC",
+    "name": "Cerebras-GPT-111M",
+    "lab": "Cerebras",
+    "org": "Cerebras",
+    "desc": "Tiny GPT model with full open access — for research and fine-tuning.",
+    "tags": [
+      "Research",
+      "Fine-Tuning",
+      "Open Source"
+    ],
+    "badge": "open",
+    "badgeClass": "badge-open",
+    "rating": 3.8,
+    "reviews": 280,
+    "price": "Free (open)",
+    "types": [
+      "language",
+      "open"
+    ],
+    "price_start": 0
+  },
+  {
+    "id": "cerebras-13b",
+    "icon": "🧠",
+    "bg": "#FEE8EC",
+    "name": "Cerebras-GPT-13B",
+    "lab": "Cerebras",
+    "org": "Cerebras",
+    "desc": "Open GPT model optimized for Cerebras Wafer-Scale Engine hardware.",
+    "tags": [
+      "Open Source",
+      "13B",
+      "Cerebras HW"
+    ],
+    "badge": "open",
+    "badgeClass": "badge-open",
+    "rating": 4,
+    "reviews": 320,
+    "price": "Free (open)",
+    "types": [
+      "language",
+      "open"
+    ],
+    "price_start": 0
+  },
+  {
+    "id": "palmyra-large",
+    "icon": "✍️",
+    "bg": "#FAFAEF",
+    "name": "Palmyra Large",
+    "lab": "Writer",
+    "org": "Writer",
+    "desc": "Enterprise-focused LLM trained for business content and brand voice.",
+    "tags": [
+      "Enterprise",
+      "Brand Voice",
+      "Business"
+    ],
+    "badge": "",
+    "badgeClass": "",
+    "rating": 4.2,
+    "reviews": 340,
+    "price": "$3/1M tk",
+    "types": [
+      "language"
+    ],
+    "price_start": 3
+  },
+  {
+    "id": "palmyra-small",
+    "icon": "✏️",
+    "bg": "#FAFAEF",
+    "name": "Palmyra Small",
+    "lab": "Writer",
+    "org": "Writer",
+    "desc": "Compact Palmyra for fast document drafting and summarization.",
+    "tags": [
+      "Fast",
+      "Drafting",
+      "Summarization"
+    ],
+    "badge": "",
+    "badgeClass": "",
+    "rating": 4,
+    "reviews": 260,
+    "price": "$0.50/1M tk",
+    "types": [
+      "language"
+    ],
+    "price_start": 0.5
+  }
+]

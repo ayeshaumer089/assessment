@@ -1,14 +1,13 @@
 import React from 'react';
-import { MODELS } from '../../constants';
 
-const Sidebar = ({ currentModelId, setCurrentModelId }) => {
+const Sidebar = ({ models = [], currentModelId, setCurrentModelId }) => {
   return (
     <aside className="sidebar">
       <div className="sb-sec" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <div className="sb-lbl">Models</div>
-        <input className="sb-search" type="text" placeholder="Search 525 models…" />
+        <input className="sb-search" type="text" placeholder={`Search ${models.length || 0} models...`} />
         <div id="sb-model-list" style={{ marginTop: '0.5rem', overflowY: 'auto' }}>
-          {MODELS.slice(0, 20).map(m => (
+          {models.slice(0, 20).map(m => (
             <div 
               key={m.id} 
               className={`sb-model ${currentModelId === m.id ? 'on' : ''}`}

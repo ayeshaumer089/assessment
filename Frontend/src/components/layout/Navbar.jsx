@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const Navbar = ({ goHome, openApp }) => {
+const Navbar = ({ goHome, openApp, goSignIn }) => {
   const [lang, setLang] = useState({ code: 'EN', label: 'English' });
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
 
@@ -75,7 +75,7 @@ const Navbar = ({ goHome, openApp }) => {
             </div>
           )}
         </div>
-        <button className="btn btn-ghost">Sign in</button>
+        <button className="btn btn-ghost" onClick={goSignIn}>Sign in</button>
         <button className="btn btn-primary" onClick={() => openApp('chat')}>Get Started →</button>
       </div>
     </nav>
