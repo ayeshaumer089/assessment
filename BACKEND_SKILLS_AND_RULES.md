@@ -16,5 +16,6 @@
 
 ## Compliance checks performed
 - `Backend/src/models/models.service.ts` read the models JSON file on every request.
-- Service now caches parsed JSON once in memory and returns cached results.
-- `models` module is already properly registered in `Backend/src/app.module.ts`.
+- Implemented fix: added in-memory cache (`modelsCache`) and lazy-loading in `getAll()`.
+- Verified: `models` module remains properly registered in `Backend/src/app.module.ts`.
+- Hardened auth logout flow: reject empty tokens in `Backend/src/auth/auth.service.ts`.

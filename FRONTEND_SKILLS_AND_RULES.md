@@ -16,5 +16,6 @@
 
 ## Compliance checks performed
 - `Frontend/src/services/auth.js` and `Frontend/src/services/models.js` had duplicated API base logic.
-- A shared API client has been introduced and both services now reuse it.
-- Existing ChatHub behavior and visual flow are preserved.
+- Implemented fix: both files now reuse `Frontend/src/services/apiClient.js` (`apiRequest`).
+- Verified: no duplicated API base URL constants remain in service files other than shared client.
+- Removed an unused import in `Frontend/src/App.jsx` to keep app shell clean and maintainable.

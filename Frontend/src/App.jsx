@@ -4,7 +4,6 @@ import AppPage from './pages/AppPage';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
 import OnboardingOverlay from './components/ui/OnboardingOverlay';
-import { MODELS } from './constants';
 
 function App() {
   const [activePage, setActivePage] = useState('landing');

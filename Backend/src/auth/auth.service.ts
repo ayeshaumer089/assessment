@@ -47,6 +47,9 @@ export class AuthService {
   }
 
   async logout(token: string) {
+    if (!token) {
+      throw new UnauthorizedException('Invalid token');
+    }
     this.revokedTokens.add(token);
     return { message: 'Logged out successfully' };
   }
