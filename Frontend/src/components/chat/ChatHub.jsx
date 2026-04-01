@@ -169,10 +169,26 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, currentModelId, set
     setShowCPanel(false);
 
     setTimeout(() => {
-      setMessages(prev => [...prev, { 
-        role: 'ai', 
-        content: `I'm using **${activeModel.name}** to process your request. This is a demonstration of the NexusAI chat interface.` 
-      }]);
+      const recommended = getRecommendedModels(normalized);
+      setMessages(prev => [
+        ...prev,
+        {
+          role: 'ai',
+          type: 'milestone_card',
+          content: 'Congratulations - you just sent your first AI prompt!',
+        },
+        {
+          role: 'ai',
+          type: 'model_intro',
+          content: `Based on your goal - **${normalized}** - here are the top models I'd recommend. I'll introduce them one by one so you can get to know each one. Tap **View Details** to learn more, or **Proceed** to go straight to selecting a version.`,
+        },
+        ...recommended.map((model) => ({
+          role: 'ai',
+          type: 'model_card',
+          model,
+          content: model.name,
+        })),
+      ]);
       setIsTyping(false);
     }, 1500);
   };
@@ -189,6 +205,28 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, currentModelId, set
     const levelNote = (localAnswers.level || '').toLowerCase().includes('beginner') ? 'Please explain things clearly with no assumed technical knowledge.' : (localAnswers.level || '').toLowerCase().includes('developer') ? 'I am a developer — feel free to use technical terms and code snippets.' : '';
     const budgetNote = (localAnswers.budget || '').toLowerCase().includes('free') ? 'Prioritise free or open-source solutions where possible.' : 'Focus on the best solution; note any significant costs.';
     return `You are ${role}. Help me with: ${localAnswers.goal || 'my AI goals'}.\n\nThis is for ${audience}. ${levelNote}\n\nPlease give a clear, structured response with practical steps I can act on immediately. ${budgetNote}\n\nStart with a concise overview, then walk me through the most effective approach step by step.`;
+  };
+
+  const getRecommendedModels = (promptText) => {
+    const source = promptText?.toLowerCase() || (localAnswers.goal || '').toLowerCase();
+    let filtered = modelsData;
+
+    if (source.includes('image') || source.includes('design') || source.includes('art')) {
+      filtered = modelsData.filter((m) => (m.types || []).includes('image_gen') || (m.types || []).includes('vision'));
+    } else if (source.includes('video')) {
+      filtered = modelsData.filter((m) => (m.types || []).includes('video'));
+    } else if (source.includes('audio') || source.includes('voice') || source.includes('music')) {
+      filtered = modelsData.filter((m) => (m.types || []).includes('audio'));
+    } else if (source.includes('code') || source.includes('build') || source.includes('app')) {
+      filtered = modelsData.filter((m) => (m.types || []).includes('code') || (m.types || []).includes('agents'));
+    }
+
+    return (filtered.length ? filtered : modelsData).slice(0, 3);
+  };
+
+  const getVersionsCount = (modelId) => {
+    const variants = MODEL_VARS[modelId];
+    return Array.isArray(variants) && variants.length ? variants.length : 1;
   };
 
   const onboardPick = (phase, value, icon) => {
@@ -314,7 +352,9 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, currentModelId, set
             <div key={i} className={`msg ${m.role}`}>
               <div className="msg-av">{m.role === 'user' ? 'U' : '✦'}</div>
               <div>
-                <div className="bubble" dangerouslySetInnerHTML={{ __html: m.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>') }}></div>
+                {!['model_intro', 'model_card', 'milestone_card'].includes(m.type) && (
+                  <div className="bubble" dangerouslySetInnerHTML={{ __html: m.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>') }}></div>
+                )}
                 {m.type === 'onboard_question' && (
                   <div className="hub-q-card">
                     <div className="hub-q-eyebrow">✦ {m.nextPhase.toUpperCase().replace('_', ' ')}</div>
@@ -342,6 +382,51 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, currentModelId, set
                       <button className="ppc-btn ppc-edit">✏ Edit</button>
                       <button className="ppc-btn ppc-regen">🔄 Regenerate</button>
                       <button className="ppc-btn ppc-del" onClick={() => { setOnboardPhase('start'); setMessages([]); setLocalAnswers({}); }}>✕ Delete</button>
+                    </div>
+                  </div>
+                )}
+                {m.type === 'milestone_card' && (
+                  <div className="milestone-card">
+                    <div className="milestone-icon">🎓</div>
+                    <h4>Congratulations - you just sent your first AI prompt!</h4>
+                    <p>You now know how to guide AI to get focused, useful results. This is one of the most valuable skills in working with AI effectively - and you've already got it.</p>
+                    <div className="milestone-next">
+                      <strong>What's next: Explore AI Models</strong>
+                      <div>Now I'll introduce you to the models that can help with your specific goal. You'll see how they differ and how to pick the right one - then we'll get you set up.</div>
+                    </div>
+                  </div>
+                )}
+                {m.type === 'model_intro' && (
+                  <div className="hub-q-card" style={{ marginTop: '0.75rem' }}>
+                    <div
+                      className="hub-q-hint"
+                      style={{ marginBottom: 0 }}
+                      dangerouslySetInnerHTML={{ __html: m.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }}
+                    ></div>
+                  </div>
+                )}
+                {m.type === 'model_card' && (
+                  <div className="mcard rec-card" style={{ marginTop: '0.75rem', maxWidth: '560px', cursor: 'default' }}>
+                    <div className="mcard-top">
+                      <div className="mcard-icon-wrap">
+                        <div className="mcard-icon" style={{ background: m.model.bg }}>{m.model.icon}</div>
+                        <div>
+                          <div className="mcard-name">{m.model.name}</div>
+                          <div className="mcard-org">by {m.model.org}</div>
+                        </div>
+                      </div>
+                      {m.model.badge ? <span className={`mcard-badge ${m.model.badgeClass}`}>{m.model.badge}</span> : null}
+                    </div>
+                    <div className="mcard-desc">{m.model.desc}</div>
+                    <div className="rec-stats">
+                      <div className="rec-stat"><strong>{Number(m.model.rating || 4.5).toFixed(1)}<span className="stars">★</span></strong><span>RATING</span></div>
+                      <div className="rec-stat"><strong>{m.model.price || 'N/A'}</strong><span>PRICING</span></div>
+                      <div className="rec-stat"><strong>{getVersionsCount(m.model.id)}</strong><span>VERSIONS</span></div>
+                    </div>
+                    <div className="rec-update">Latest version updated recently - {(m.model.reviews || 0).toLocaleString()} reviews</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '0.8rem' }}>
+                      <button className="btn btn-ghost" onClick={() => setCurrentModelId(m.model.id)}>View Details</button>
+                      <button className="btn btn-primary" onClick={() => setCurrentModelId(m.model.id)}>Proceed with this →</button>
                     </div>
                   </div>
                 )}
