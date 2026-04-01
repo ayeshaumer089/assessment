@@ -288,6 +288,17 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1rem 2
 .rec-stat span{font-size:0.68rem;color:var(--text3)}
 .rec-update{margin-top:0.7rem;background:#CDEAE2;border:1px solid #9FD8C8;border-radius:9px;padding:0.55rem 0.7rem;font-size:0.84rem;color:#0b5d4b}
 
+/* COMPACT CHAT RECOMMENDATION */
+.compact-reco{background:var(--white);border:1px solid var(--border2);border-radius:14px;padding:0.9rem;max-width:560px;box-shadow:var(--shadow)}
+.compact-reco-title{font-size:1.02rem;line-height:1.5;color:var(--text);margin-bottom:0.7rem}
+.compact-reco-item{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:0.55rem 0.7rem;margin-top:0.55rem}
+.compact-reco-left{display:flex;align-items:center;gap:10px;min-width:0}
+.compact-reco-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.compact-reco-name{font-size:0.98rem;font-weight:600;color:var(--text);line-height:1.2}
+.compact-reco-sub{font-size:0.82rem;color:var(--text3);margin-top:2px}
+.compact-reco-actions{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.compact-reco-actions .btn{padding:0.38rem 0.8rem;font-size:0.8rem}
+
 /* RIGHT PANEL */
 .rpanel{width:272px;flex-shrink:0;background:var(--white);border-left:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
 .rp-sec{padding:1rem;border-bottom:1px solid var(--border)}

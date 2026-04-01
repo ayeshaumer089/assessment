@@ -151,6 +151,7 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, currentModelId, set
   const handleSend = (text) => {
     const val = text || inputValue;
     if (!val.trim()) return;
+    const isDirectInput = !text;
     const normalized = val.trim();
     const now = Date.now();
 
@@ -170,6 +171,20 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, currentModelId, set
 
     setTimeout(() => {
       const recommended = getRecommendedModels(normalized);
+      if (isDirectInput) {
+        setMessages(prev => [
+          ...prev,
+          {
+            role: 'ai',
+            type: 'compact_model_reco',
+            content: `Great question! Here are the most relevant models based on what you said - tap any card to explore, or click "Proceed" to start the variation selector and agent wizard:`,
+            models: recommended,
+          },
+        ]);
+        setIsTyping(false);
+        return;
+      }
+
       setMessages(prev => [
         ...prev,
         {
@@ -183,7 +198,7 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, currentModelId, set
           content: `Based on your goal - **${normalized}** - here are the top models I'd recommend. I'll introduce them one by one so you can get to know each one. Tap **View Details** to learn more, or **Proceed** to go straight to selecting a version.`,
         },
         ...recommended.map((model) => ({
-          role: 'ai',
+        role: 'ai', 
           type: 'model_card',
           model,
           content: model.name,
@@ -352,8 +367,8 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, currentModelId, set
             <div key={i} className={`msg ${m.role}`}>
               <div className="msg-av">{m.role === 'user' ? 'U' : '✦'}</div>
               <div>
-                {!['model_intro', 'model_card', 'milestone_card'].includes(m.type) && (
-                  <div className="bubble" dangerouslySetInnerHTML={{ __html: m.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>') }}></div>
+                {!['model_intro', 'model_card', 'milestone_card', 'compact_model_reco'].includes(m.type) && (
+                <div className="bubble" dangerouslySetInnerHTML={{ __html: m.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>') }}></div>
                 )}
                 {m.type === 'onboard_question' && (
                   <div className="hub-q-card">
@@ -430,6 +445,26 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, currentModelId, set
                     </div>
                   </div>
                 )}
+                {m.type === 'compact_model_reco' && (
+                  <div className="compact-reco">
+                    <div className="compact-reco-title">{m.content}</div>
+                    {(m.models || []).map((model) => (
+                      <div key={model.id} className="compact-reco-item">
+                        <div className="compact-reco-left">
+                          <div className="compact-reco-icon" style={{ background: model.bg }}>{model.icon}</div>
+                          <div>
+                            <div className="compact-reco-name">{model.name}</div>
+                            <div className="compact-reco-sub">{model.badge ? `${model.badge} · ` : ''}{model.price || ''}</div>
+                          </div>
+                        </div>
+                        <div className="compact-reco-actions">
+                          <button className="btn btn-ghost" onClick={() => setCurrentModelId(model.id)}>Details</button>
+                          <button className="btn btn-primary" onClick={() => setCurrentModelId(model.id)}>Proceed →</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <div className="msg-meta">NexusAI Hub · guided setup</div>
               </div>
             </div>
@@ -449,7 +484,7 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, currentModelId, set
               ))}
             </div>
           )}
-
+          
           <div className="inp-row">
             <div className="inp-wrap inp-wrap-hero">
               <textarea 

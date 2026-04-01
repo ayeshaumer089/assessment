@@ -11,9 +11,14 @@ type ModelItem = {
 @Injectable()
 export class ModelsService {
   private readonly modelsPath = join(process.cwd(), 'src', 'models', 'data', 'models.json');
+  private readonly models: ModelItem[];
+
+  constructor() {
+    const raw = readFileSync(this.modelsPath, 'utf8');
+    this.models = JSON.parse(raw) as ModelItem[];
+  }
 
   getAll(): ModelItem[] {
-    const raw = readFileSync(this.modelsPath, 'utf8');
-    return JSON.parse(raw) as ModelItem[];
+    return this.models;
   }
 }
