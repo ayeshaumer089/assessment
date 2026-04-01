@@ -1,9 +1,10 @@
 import React from 'react';
 import { logout } from '../../services/auth';
+import { getAuthToken } from '../../services/session';
 
 const AppNavbar = ({ activeTab, setActiveTab, goHome, goSignIn, isAuthenticated, onLogout, openModal, currentModelId }) => {
   const handleLogout = async () => {
-    const token = localStorage.getItem('authToken');
+    const token = getAuthToken();
     try {
       if (token) {
         await logout(token);

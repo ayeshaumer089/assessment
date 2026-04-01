@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { register } from '../services/auth';
+import { setAuthToken } from '../services/session';
 
 const SignUpPage = ({ goHome, goSignIn, openApp }) => {
   const [name, setName] = useState('');
@@ -16,7 +17,7 @@ const SignUpPage = ({ goHome, goSignIn, openApp }) => {
     try {
       const data = await register({ name, email, password });
       if (data?.accessToken) {
-        localStorage.setItem('authToken', data.accessToken);
+        setAuthToken(data.accessToken);
       }
       openApp('chat');
     } catch (err) {

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { login } from '../services/auth';
+import { setAuthToken } from '../services/session';
 
 const SignInPage = ({ goHome, goSignUp, openApp }) => {
   const [email, setEmail] = useState('');
@@ -15,7 +16,7 @@ const SignInPage = ({ goHome, goSignUp, openApp }) => {
     try {
       const data = await login({ email, password });
       if (data?.accessToken) {
-        localStorage.setItem('authToken', data.accessToken);
+        setAuthToken(data.accessToken);
       }
       openApp('chat');
     } catch (err) {

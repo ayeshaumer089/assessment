@@ -4,6 +4,7 @@ import AppPage from './pages/AppPage';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
 import OnboardingOverlay from './components/ui/OnboardingOverlay';
+import { clearAuthToken, getOnboardingDone, isAuthenticated, setOnboardingDone } from './services/session';
 
 function App() {
   const [activePage, setActivePage] = useState('landing');
@@ -13,11 +14,11 @@ function App() {
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isObDone, setIsObDone] = useState(false);
   const [onboardingAnswers, setOnboardingAnswers] = useState({});
-  const isAuthenticated = Boolean(localStorage.getItem('authToken'));
+  const authenticated = isAuthenticated();
 
   useEffect(() => {
     // Show onboarding for new users if not done
-    const done = localStorage.getItem('_obDone');
+    const done = getOnboardingDone();
     if (!done) {
       // setIsOnboardingOpen(true); // Uncomment to enable on load
     }
@@ -42,14 +43,14 @@ function App() {
   };
 
   const logout = () => {
-    localStorage.removeItem('authToken');
+    clearAuthToken();
     setActivePage('landing');
   };
 
   const handleOnboardingComplete = (answers) => {
     setIsObDone(true);
     setOnboardingAnswers(answers);
-    localStorage.setItem('_obDone', 'true');
+    setOnboardingDone();
     openApp('chat');
   };
 
@@ -67,7 +68,7 @@ function App() {
           setActiveTab={setActiveTab}
           goHome={goHome}
           goSignIn={goSignIn}
-          isAuthenticated={isAuthenticated}
+          isAuthenticated={authenticated}
           onLogout={logout}
           currentModelId={currentModelId}
           setCurrentModelId={setCurrentModelId}
