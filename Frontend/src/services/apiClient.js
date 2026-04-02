@@ -2,7 +2,13 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localho
 
 export async function apiRequest(path, options = {}) {
   try {
-    const response = await fetch(`${API_BASE_URL}${path}`, options);
+    const response = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      headers: {
+        ...options.headers,
+      },
+      signal: options.signal
+    });
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
@@ -12,6 +18,9 @@ export async function apiRequest(path, options = {}) {
 
     return data;
   } catch (error) {
+    if (error.name === 'AbortError') {
+      return null;
+    }
     if (error instanceof Error) {
       throw error;
     }

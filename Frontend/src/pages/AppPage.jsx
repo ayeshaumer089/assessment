@@ -14,18 +14,23 @@ const AppPage = ({ activeTab, setActiveTab, goHome, goSignIn, isAuthenticated, o
   const [chatModels, setChatModels] = useState(MODELS);
 
   useEffect(() => {
-    let isMounted = true;
-    fetchModels()
+    const abortController = new AbortController();
+    
+    fetchModels(abortController.signal)
       .then((data) => {
-        if (isMounted && Array.isArray(data) && data.length > 0) {
+        if (data && Array.isArray(data) && data.length > 0) {
           setChatModels(data);
         }
       })
-      .catch(() => {
+      .catch((error) => {
         // Keep fallback models from constants to avoid breaking UI if backend is unreachable.
+        if (error.name !== 'AbortError') {
+          console.error('Failed to fetch models:', error);
+        }
       });
+    
     return () => {
-      isMounted = false;
+      abortController.abort();
     };
   }, []);
 
