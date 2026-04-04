@@ -3,7 +3,7 @@ import { MODELS, MODEL_VARS } from '../../constants';
 import Sidebar from './Sidebar';
 import RightPanel from './RightPanel';
 
-const ChatHub = ({ models = [], searchQuery, setSearchQuery, attachedFiles, setAttachedFiles, currentModelId, setCurrentModelId, isObDone, onboardingAnswers }) => {
+const ChatHub = ({ models = [], searchQuery, setSearchQuery, attachedFiles, setAttachedFiles, currentModelId, setCurrentModelId, isObDone, onboardingAnswers, openModal }) => {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -637,7 +637,7 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, attachedFiles, setA
         </div>
       </main>
 
-      <RightPanel activeModel={activeModel} onboardingAnswers={localAnswers} />
+      <RightPanel activeModel={activeModel} onboardingAnswers={localAnswers} openModal={openModal} />
     </div>
   );
 };

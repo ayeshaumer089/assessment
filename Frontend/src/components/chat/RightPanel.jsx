@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const RightPanel = ({ activeModel, onboardingAnswers }) => {
+const RightPanel = ({ activeModel, onboardingAnswers, openModal }) => {
   const [sparkBars, setSparkBars] = useState(Array.from({ length: 24 }, () => 10 + Math.random() * 36));
   const [kpis, setKpis] = useState({
     req: 1284,
@@ -131,28 +131,40 @@ const RightPanel = ({ activeModel, onboardingAnswers }) => {
             </div>
           </div>
           <div className="am-btns" style={{ display: 'flex', gap: '8px', marginTop: '1rem' }}>
-            <button className="am-btn out" style={{ 
-              flex: 1, 
-              padding: '0.5rem', 
-              fontSize: '0.75rem', 
-              fontWeight: 600, 
-              borderRadius: '8px', 
-              border: '1.5px solid var(--border2)', 
-              background: 'none',
-              color: 'var(--text2)',
-              cursor: 'pointer'
-            }}>Details</button>
-            <button className="am-btn fill" style={{ 
-              flex: 1, 
-              padding: '0.5rem', 
-              fontSize: '0.75rem', 
-              fontWeight: 600, 
-              borderRadius: '8px', 
-              border: '1.5px solid var(--accent-border)', 
-              background: 'var(--accent-lt)',
-              color: 'var(--accent)',
-              cursor: 'pointer'
-            }}>Pricing</button>
+            <button 
+              className="am-btn out" 
+              style={{ 
+                flex: 1, 
+                padding: '0.5rem', 
+                fontSize: '0.75rem', 
+                fontWeight: 600, 
+                borderRadius: '8px', 
+                border: '1.5px solid var(--border2)', 
+                background: 'none',
+                color: 'var(--text2)',
+                cursor: 'pointer'
+              }}
+              onClick={() => openModal(activeModel.id)}
+            >
+              Details
+            </button>
+            <button 
+              className="am-btn fill" 
+              style={{ 
+                flex: 1, 
+                padding: '0.5rem', 
+                fontSize: '0.75rem', 
+                fontWeight: 600, 
+                borderRadius: '8px', 
+                border: '1.5px solid var(--accent-border)', 
+                background: 'var(--accent-lt)',
+                color: 'var(--accent)',
+                cursor: 'pointer'
+              }}
+              onClick={() => openModal(activeModel.id)}
+            >
+              Pricing
+            </button>
           </div>
         </div>
       </div>

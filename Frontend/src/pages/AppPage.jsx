@@ -65,6 +65,7 @@ const AppPage = ({ activeTab, setActiveTab, goHome, goSignIn, isAuthenticated, o
             setCurrentModelId={setCurrentModelId} 
             isObDone={isObDone}
             onboardingAnswers={onboardingAnswers}
+            openModal={openModal}
           />
         )}
         
