@@ -6,16 +6,23 @@ const SignUpPage = ({ goHome, goSignIn, openApp }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const data = await register({ name, email, password });
+      const data = await register({ name, email, password, confirmPassword });
       if (data?.accessToken) {
         setAuthToken(data.accessToken);
       }
@@ -51,6 +58,8 @@ const SignUpPage = ({ goHome, goSignIn, openApp }) => {
             <input id="signup-email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
             <label htmlFor="signup-password">Password</label>
             <input id="signup-password" type="password" placeholder="Minimum 8 characters" minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <label htmlFor="confirm-password">Confirm Password</label>
+            <input id="confirm-password" type="password" placeholder="Repeat your password" minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
             {error ? <div className="auth-error">{error}</div> : null}
             <button type="submit" className="btn btn-primary" disabled={isLoading}>
               {isLoading ? 'Creating account...' : 'Sign Up'}
