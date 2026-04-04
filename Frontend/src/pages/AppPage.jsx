@@ -8,7 +8,7 @@ import { MODELS } from '../constants';
 import ModelDetailModal from '../components/ui/ModelDetailModal';
 import { fetchModels } from '../services/models';
 
-const AppPage = ({ activeTab, setActiveTab, goHome, goSignIn, isAuthenticated, onLogout, currentModelId, setCurrentModelId, searchQuery, setSearchQuery, isObDone, onboardingAnswers }) => {
+const AppPage = ({ activeTab, setActiveTab, goHome, goSignIn, isAuthenticated, onLogout, currentModelId, setCurrentModelId, searchQuery, setSearchQuery, attachedFiles, setAttachedFiles, isObDone, onboardingAnswers }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedModel, setSelectedModel] = useState(null);
   const [chatModels, setChatModels] = useState(MODELS);
@@ -58,6 +58,8 @@ const AppPage = ({ activeTab, setActiveTab, goHome, goSignIn, isAuthenticated, o
           <ChatHub 
             searchQuery={searchQuery} 
             setSearchQuery={setSearchQuery} 
+            attachedFiles={attachedFiles}
+            setAttachedFiles={setAttachedFiles}
             models={chatModels}
             currentModelId={currentModelId} 
             setCurrentModelId={setCurrentModelId} 

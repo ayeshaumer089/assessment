@@ -91,8 +91,17 @@ const Hero = ({ openApp }) => {
 
   const handleFileAttach = (e) => {
     const files = Array.from(e.target.files);
-    setAttachedFiles(prev => [...prev, ...files]);
-    nxToast(`${files.length} file(s) attached`);
+    if (files.length > 0) {
+      setAttachedFiles(prev => [...prev, ...files]);
+      const file = files[0];
+      const isImage = file.type.startsWith('image/');
+      if (isImage) {
+        setQuery(`What AI tools can help me work with this image: "${file.name}"?`);
+      } else {
+        setQuery(`Help me find AI tools for my file: "${file.name}"`);
+      }
+      nxToast(`${files.length} file(s) attached`);
+    }
   };
 
   const removeAttachment = (index) => {
@@ -119,13 +128,13 @@ const Hero = ({ openApp }) => {
     } else {
       setPhase('building');
       setTimeout(() => {
-        openApp('chat', query || opt.label);
+        openApp('chat', query || opt.label, attachedFiles);
       }, 1500);
     }
   };
 
   const launchWithQuery = () => {
-    openApp('chat', query);
+    openApp('chat', query, attachedFiles);
   };
 
   useEffect(() => {
@@ -173,10 +182,27 @@ const Hero = ({ openApp }) => {
                 <button 
                   className="hsb-btn" 
                   title="Attach file"
-                  onClick={triggerFileInput}
+                  onClick={() => {
+                    fileInputRef.current.accept = ".pdf,.doc,.docx,.txt,.csv";
+                    triggerFileInput();
+                  }}
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+                  </svg>
+                </button>
+                <button 
+                  className="hsb-btn" 
+                  title="Upload image"
+                  onClick={() => {
+                    fileInputRef.current.accept = "image/*";
+                    triggerFileInput();
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
                   </svg>
                 </button>
                 <input 

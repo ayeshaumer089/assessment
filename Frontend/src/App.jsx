@@ -10,6 +10,7 @@ function App() {
   const [activePage, setActivePage] = useState('landing');
   const [activeTab, setActiveTab] = useState('chat');
   const [searchQuery, setSearchQuery] = useState('');
+  const [attachedFiles, setAttachedFiles] = useState([]);
   const [currentModelId, setCurrentModelId] = useState('gpt5');
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isObDone, setIsObDone] = useState(false);
@@ -24,10 +25,11 @@ function App() {
     }
   }, []);
 
-  const openApp = (tab = 'chat', query = '') => {
+  const openApp = (tab = 'chat', query = '', attachments = []) => {
     setActivePage('app');
     setActiveTab(tab);
     if (query) setSearchQuery(query);
+    if (attachments.length > 0) setAttachedFiles(attachments);
   };
 
   const goHome = () => {
@@ -74,6 +76,8 @@ function App() {
           setCurrentModelId={setCurrentModelId}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
+          attachedFiles={attachedFiles}
+          setAttachedFiles={setAttachedFiles}
           isObDone={isObDone}
           onboardingAnswers={onboardingAnswers}
         />

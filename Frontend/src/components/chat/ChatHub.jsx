@@ -3,7 +3,7 @@ import { MODELS, MODEL_VARS } from '../../constants';
 import Sidebar from './Sidebar';
 import RightPanel from './RightPanel';
 
-const ChatHub = ({ models = [], searchQuery, setSearchQuery, currentModelId, setCurrentModelId, isObDone, onboardingAnswers }) => {
+const ChatHub = ({ models = [], searchQuery, setSearchQuery, attachedFiles, setAttachedFiles, currentModelId, setCurrentModelId, isObDone, onboardingAnswers }) => {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -12,7 +12,6 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, currentModelId, set
   const [localAnswers, setLocalAnswers] = useState(onboardingAnswers || {});
   const [onboardPhase, setOnboardPhase] = useState(isObDone ? 'chat' : 'start');
   const [isRecording, setIsRecording] = useState(false);
-  const [attachedFiles, setAttachedFiles] = useState([]);
   const chatEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const recognitionRef = useRef(null);
@@ -83,7 +82,18 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, currentModelId, set
 
   const handleFileAttach = (e) => {
     const files = Array.from(e.target.files);
-    setAttachedFiles(prev => [...prev, ...files]);
+    if (files.length > 0) {
+      setAttachedFiles(prev => [...prev, ...files]);
+      const file = files[0];
+      const isImage = file.type.startsWith('image/');
+      if (!inputValue.trim()) {
+        if (isImage) {
+          setInputValue(`What AI tools can help me work with this image: "${file.name}"?`);
+        } else {
+          setInputValue(`Help me find AI tools for my file: "${file.name}"`);
+        }
+      }
+    }
   };
 
   const removeAttachment = (index) => {
@@ -150,10 +160,20 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, currentModelId, set
 
   const handleSend = (text) => {
     const val = text || inputValue;
-    if (!val.trim()) return;
+    if (!val.trim() && attachedFiles.length === 0) return;
     const isDirectInput = !text;
-    const normalized = val.trim();
+    let normalized = val.trim();
     const now = Date.now();
+
+    // Append attachments to the message content if present
+    if (attachedFiles.length > 0) {
+      const fileNames = attachedFiles.map(f => `"${f.name}"`).join(', ');
+      if (normalized) {
+        normalized = `${normalized}\n\n[Attached: ${fileNames}]`;
+      } else {
+        normalized = `[Attached: ${fileNames}]`;
+      }
+    }
 
     // Prevent accidental duplicate sends (e.g., strict-mode/effect double trigger).
     if (
@@ -169,7 +189,32 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, currentModelId, set
     setIsTyping(true);
     setShowCPanel(false);
 
+    const hadAttachments = attachedFiles.length > 0;
+    if (hadAttachments) setAttachedFiles([]);
+
     setTimeout(() => {
+      // If we have attachments, we show questions instead of models directly
+      if (hadAttachments && onboardPhase !== 'chat') {
+        setIsTyping(false);
+        setLocalAnswers(prev => ({ ...prev, goal: 'Analyse data or documents' }));
+        setMessages(prev => [...prev, {
+          role: 'ai',
+          content: `Great choice! 🎯 "**Analyse data or documents**" — I can already think of some excellent models for that.\n\nNow, quick question:`,
+          type: 'onboard_question',
+          question: 'Who will be using this AI?',
+          nextPhase: 'audience',
+          options: [
+            { icon: '🧑‍💼', label: 'Just me', sub: 'Personal use' },
+            { icon: '👥', label: 'My team', sub: 'Small group, work' },
+            { icon: '🏢', label: 'My company', sub: 'Business / enterprise' },
+            { icon: '👨‍💻', label: 'My customers', sub: 'Building for end-users' },
+            { icon: '🎓', label: 'Students', sub: 'Education / learning' },
+            { icon: '🌐', label: 'Anyone / public', sub: 'Open to the world' },
+          ]
+        }]);
+        return;
+      }
+
       const recommended = getRecommendedModels(normalized);
       if (isDirectInput) {
         setMessages(prev => [
@@ -177,7 +222,7 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, currentModelId, set
           {
             role: 'ai',
             type: 'compact_model_reco',
-            content: `Great question! Here are the most relevant models based on what you said - tap any card to explore, or click "Proceed" to start the variation selector and agent wizard:`,
+            content: `Great choice! 🎯 "**${normalized}**" — I can already think of some excellent models for that.\n\nNow, quick question:`,
             models: recommended,
           },
         ]);
@@ -526,10 +571,27 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, currentModelId, set
                 <button 
                   className="inp-icon-btn" 
                   title="Attach file"
-                  onClick={triggerFileInput}
+                  onClick={() => {
+                    fileInputRef.current.accept = ".pdf,.doc,.docx,.txt,.csv";
+                    triggerFileInput();
+                  }}
                 >
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+                  </svg>
+                </button>
+                <button 
+                  className="inp-icon-btn" 
+                  title="Upload image"
+                  onClick={() => {
+                    fileInputRef.current.accept = "image/*";
+                    triggerFileInput();
+                  }}
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
                   </svg>
                 </button>
                 <input 
