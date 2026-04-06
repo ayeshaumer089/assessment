@@ -37,7 +37,6 @@ const AppPage = ({ activeTab, setActiveTab, goHome, goSignIn, isAuthenticated, o
 
   useEffect(() => {
     if (activeTab === 'agents' && !isAuthenticated) {
-      nxToast('Please log in or sign up first to access the Agents page.');
       setActiveTab('chat');
       goSignIn('agents');
     }
