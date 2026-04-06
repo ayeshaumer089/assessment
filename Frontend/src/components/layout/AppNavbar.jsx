@@ -1,8 +1,10 @@
 import React from 'react';
 import { logout } from '../../services/auth';
 import { getAuthToken } from '../../services/session';
+import { useLanguage } from '../../context/LanguageContext';
 
 const AppNavbar = ({ activeTab, setActiveTab, goHome, goSignIn, isAuthenticated, onLogout, openModal, currentModelId }) => {
+  const { t } = useLanguage();
   const handleLogout = async () => {
     const token = getAuthToken();
     try {
@@ -39,32 +41,32 @@ const AppNavbar = ({ activeTab, setActiveTab, goHome, goSignIn, isAuthenticated,
           className={`app-tab ${activeTab === 'chat' ? 'active' : ''}`} 
           onClick={() => setActiveTab('chat')}
         >
-          💬 Chat Hub
+          💬 {t('chatHub', 'Chat Hub')}
         </button>
         <button 
           className={`app-tab ${activeTab === 'marketplace' ? 'active' : ''}`} 
           onClick={() => setActiveTab('marketplace')}
         >
-          🛍 Marketplace
+          🛍 {t('marketplace', 'Marketplace')}
         </button>
         <button 
           className={`app-tab ${activeTab === 'agents' ? 'active' : ''}`} 
           onClick={() => setActiveTab('agents')}
         >
-          🤖 Agents
+          🤖 {t('agents', 'Agents')}
         </button>
         <button 
           className={`app-tab ${activeTab === 'research' ? 'active' : ''}`} 
           onClick={() => setActiveTab('research')}
         >
-          🔬 Discover New
+          🔬 {t('discoverNew', 'Discover New')}
         </button>
       </div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
         <button className="btn btn-ghost" style={{ padding: '0.4rem 0.9rem', fontSize: '0.8rem' }} onClick={handleAuthAction}>
-          {isAuthenticated ? 'Logout' : 'Sign in'}
+          {isAuthenticated ? t('logout', 'Logout') : t('signIn', 'Sign in')}
         </button>
-        <button className="btn btn-primary" style={{ padding: '0.4rem 0.9rem', fontSize: '0.8rem' }} onClick={() => openModal(currentModelId)}>Try free →</button>
+        <button className="btn btn-primary" style={{ padding: '0.4rem 0.9rem', fontSize: '0.8rem' }} onClick={() => openModal(currentModelId)}>{t('tryFree', 'Try free →')}</button>
       </div>
     </div>
   );

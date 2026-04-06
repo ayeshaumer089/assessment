@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../../context/LanguageContext';
 
 const Navbar = ({ goHome, openApp, goSignIn }) => {
-  const [lang, setLang] = useState({ code: 'EN', label: 'English' });
+  const { language, setLanguage, t } = useLanguage();
   const [isLangMenuOpen, setIsLangMenuOpen] = useState(false);
 
   const toggleLangMenu = (e) => {
@@ -10,7 +11,7 @@ const Navbar = ({ goHome, openApp, goSignIn }) => {
   };
 
   const handleSetLang = (code, label) => {
-    setLang({ code, label });
+    setLanguage(code);
     setIsLangMenuOpen(false);
   };
 
@@ -43,10 +44,10 @@ const Navbar = ({ goHome, openApp, goSignIn }) => {
         NexusAI
       </div>
       <ul className="nav-links">
-        <li><a onClick={() => openApp('chat')}>Chat Hub</a></li>
-        <li><a onClick={() => openApp('marketplace')}>Marketplace</a></li>
-        <li><a onClick={() => openApp('research')}>Discover New</a></li>
-        <li><a onClick={() => openApp('agents')}>Agents</a></li>
+        <li><a onClick={() => openApp('chat')}>{t('chatHub', 'Chat Hub')}</a></li>
+        <li><a onClick={() => openApp('marketplace')}>{t('marketplace', 'Marketplace')}</a></li>
+        <li><a onClick={() => openApp('research')}>{t('discoverNew', 'Discover New')}</a></li>
+        <li><a onClick={() => openApp('agents')}>{t('agents', 'Agents')}</a></li>
       </ul>
       <div className="nav-actions">
         <div className="lang-selector-wrap">
@@ -55,19 +56,19 @@ const Navbar = ({ goHome, openApp, goSignIn }) => {
               <circle cx="12" cy="12" r="10" />
               <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
             </svg>
-            <span className="lang-code">{lang.code}</span>
+            <span className="lang-code">{language}</span>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="lang-chevron">
               <path d="m6 9 6 6 6-6" />
             </svg>
           </button>
           {isLangMenuOpen && (
             <div className="lang-menu open">
-              <div className="lang-menu-head">App Language</div>
+              <div className="lang-menu-head">{t('appLanguage', 'App Language')}</div>
               <div className="lang-opts">
                 {languages.map((l) => (
                   <button 
                     key={l.code} 
-                    className={`lang-opt ${lang.code === l.code ? 'active' : ''}`}
+                    className={`lang-opt ${language === l.code ? 'active' : ''}`}
                     onClick={() => handleSetLang(l.code, l.label)}
                   >
                     <span className="lang-opt-short">{l.short}</span>
@@ -78,8 +79,8 @@ const Navbar = ({ goHome, openApp, goSignIn }) => {
             </div>
           )}
         </div>
-        <button className="btn btn-ghost" onClick={goSignIn}>Sign in</button>
-        <button className="btn btn-primary" onClick={() => openApp('chat')}>Get Started →</button>
+        <button className="btn btn-ghost" onClick={goSignIn}>{t('signIn', 'Sign in')}</button>
+        <button className="btn btn-primary" onClick={() => openApp('chat')}>{t('getStarted', 'Get Started →')}</button>
       </div>
     </nav>
   );

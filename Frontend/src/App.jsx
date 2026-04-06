@@ -5,8 +5,10 @@ import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
 import OnboardingOverlay from './components/ui/OnboardingOverlay';
 import { clearAuthToken, getOnboardingDone, isAuthenticated, setOnboardingDone } from './services/session';
+import { useLanguage } from './context/LanguageContext';
 
 function App() {
+  const { language } = useLanguage();
   const VALID_TABS = new Set(['chat', 'marketplace', 'agents', 'research']);
   const [activePage, setActivePage] = useState('landing');
   const [activeTab, setActiveTab] = useState('chat');
@@ -25,7 +27,13 @@ function App() {
     if (!done) {
       // setIsOnboardingOpen(true); // Uncomment to enable on load
     }
-  }, []);
+  }, []); 
+
+  useEffect(() => {
+    document.documentElement.lang = language.toLowerCase();
+    const rtlLanguages = new Set(['AR', 'UR']);
+    document.documentElement.dir = rtlLanguages.has(language) ? 'rtl' : 'ltr';
+  }, [language]);
 
   const resolveTab = (tab) => (VALID_TABS.has(tab) ? tab : 'chat');
 
