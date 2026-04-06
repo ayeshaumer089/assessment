@@ -44,7 +44,7 @@ const AppPage = ({ activeTab, setActiveTab, goHome, goSignIn, isAuthenticated, o
   }, [activeTab, isAuthenticated, setActiveTab, goSignIn]);
 
   const openModal = (id) => {
-    const model = MODELS.find(m => m.id === id);
+    const model = chatModels.find(m => m.id === id) || MODELS.find(m => m.id === id);
     setSelectedModel(model);
     setIsModalOpen(true);
   };
@@ -79,7 +79,7 @@ const AppPage = ({ activeTab, setActiveTab, goHome, goSignIn, isAuthenticated, o
         )}
         
         {activeTab === 'marketplace' && (
-          <Marketplace openModal={openModal} />
+          <Marketplace openModal={openModal} models={chatModels} />
         )}
         
         {activeTab === 'agents' && (

@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { MODELS, AI_LABS } from '../../constants';
+import React, { useMemo, useState } from 'react';
+import { MODELS } from '../../constants';
 import { getModelPriceDisplay } from '../../utils/helpers';
 
-const Marketplace = ({ openModal, openApp }) => {
+const Marketplace = ({ openModal, openApp, models = [] }) => {
   const [search, setSearch] = useState('');
   const [selectedLab, setSelectedLab] = useState('all');
   const [filters, setFilters] = useState({
@@ -13,6 +13,21 @@ const Marketplace = ({ openModal, openApp }) => {
     minRating: 'any'
   });
   const [priceRange, setPriceRange] = useState(100);
+  const modelsData = Array.isArray(models) && models.length > 0 ? models : MODELS;
+  const labTabs = useMemo(() => {
+    const uniqueNames = Array.from(
+      new Set(
+        modelsData
+          .map((m) => (m.org || '').trim())
+          .filter(Boolean),
+      ),
+    );
+    return uniqueNames.sort((a, b) => a.localeCompare(b));
+  }, [modelsData]);
+
+  const filteredLabs = labTabs.filter((labName) =>
+    search.trim() === '' ? true : labName.toLowerCase().includes(search.toLowerCase()),
+  );
 
   const toggleFilter = (category, key) => {
     setFilters(prev => ({
@@ -24,14 +39,14 @@ const Marketplace = ({ openModal, openApp }) => {
     }));
   };
 
-  const filteredModels = MODELS.filter(m => {
+  const filteredModels = modelsData.filter(m => {
     const matchesSearch = search === '' || 
       m.name.toLowerCase().includes(search.toLowerCase()) || 
       m.org.toLowerCase().includes(search.toLowerCase()) ||
       m.desc.toLowerCase().includes(search.toLowerCase()) ||
-      m.tags.some(t => t.toLowerCase().includes(search.toLowerCase()));
+      (m.tags || []).some(t => t.toLowerCase().includes(search.toLowerCase()));
     
-    const matchesLab = selectedLab === 'all' || m.lab === selectedLab;
+    const matchesLab = selectedLab === 'all' || m.org === selectedLab;
     
     return matchesSearch && matchesLab;
   });
@@ -61,14 +76,22 @@ const Marketplace = ({ openModal, openApp }) => {
       
       <div className="labs-bar">
         <div className="labs-lbl">Filter by Lab:</div>
-        {AI_LABS.map(lab => (
+        <button
+          className={`lab-pill ${selectedLab === 'all' ? 'on' : ''}`}
+          onClick={() => setSelectedLab('all')}
+          title="Show all labs"
+        >
+          <span className="lab-logo">✦</span>
+          All Labs
+        </button>
+        {filteredLabs.map((labName) => (
           <button 
-            key={lab.id} 
-            className={`lab-pill ${selectedLab === lab.id ? 'on' : ''}`}
-            onClick={() => setSelectedLab(lab.id)}
+            key={labName}
+            className={`lab-pill ${selectedLab === labName ? 'on' : ''}`}
+            onClick={() => setSelectedLab(labName)}
           >
-            <span className="lab-logo">{lab.icon}</span>
-            {lab.name}
+            <span className="lab-logo">●</span>
+            {labName}
           </button>
         ))}
       </div>
