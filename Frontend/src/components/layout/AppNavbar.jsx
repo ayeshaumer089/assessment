@@ -30,7 +30,7 @@ const AppNavbar = ({ activeTab, setActiveTab, goHome, goSignIn, isAuthenticated,
     <div className="app-nav">
       <div className="logo" style={{ fontSize: '1.1rem' }} onClick={goHome}>
         <div className="logo-mark" style={{ width: '22px', height: '22px', borderRadius: '5px' }}>
-          <svg viewBox="0 0 14 14" style={{ width: '11px', height: '11px' }}>
+           <svg viewBox="0 0 14 14" style={{ width: '11px', height: '11px' }}>
             <path d="M7 1 L13 7 L7 13 L1 7 Z" />
           </svg>
         </div>
