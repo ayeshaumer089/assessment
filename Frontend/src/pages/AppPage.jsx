@@ -7,6 +7,7 @@ import AgentBuilder from '../components/agents/AgentBuilder';
 import { MODELS } from '../constants';
 import ModelDetailModal from '../components/ui/ModelDetailModal';
 import { fetchModels } from '../services/models';
+import { nxToast } from '../utils/helpers';
 
 const AppPage = ({ activeTab, setActiveTab, goHome, goSignIn, isAuthenticated, onLogout, currentModelId, setCurrentModelId, searchQuery, setSearchQuery, attachedFiles, setAttachedFiles, isObDone, onboardingAnswers }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,6 +34,14 @@ const AppPage = ({ activeTab, setActiveTab, goHome, goSignIn, isAuthenticated, o
       abortController.abort();
     };
   }, []);
+
+  useEffect(() => {
+    if (activeTab === 'agents' && !isAuthenticated) {
+      nxToast('Please log in or sign up first to access the Agents page.');
+      setActiveTab('chat');
+      goSignIn();
+    }
+  }, [activeTab, isAuthenticated, setActiveTab, goSignIn]);
 
   const openModal = (id) => {
     const model = MODELS.find(m => m.id === id);

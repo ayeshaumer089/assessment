@@ -41,6 +41,23 @@ const SQ_DATA = {
   ],
 };
 
+const QUICK_ACTIONS = [
+  { icon: '🎨', label: 'Create image', prompt: 'Create a clean hero image concept for my product homepage.' },
+  { icon: '🎵', label: 'Generate Audio', prompt: 'Generate a short voiceover script and audio style guide for a promo video.' },
+  { icon: '🎬', label: 'Create video', prompt: 'Help me create a short 30-second video concept with scenes and narration.' },
+  { icon: '📊', label: 'Create slides', prompt: 'Create a 10-slide presentation outline for my project update.' },
+  { icon: '📈', label: 'Create Infographs', prompt: 'Design an infographic structure with sections, stats, and visual hierarchy.' },
+  { icon: '❓', label: 'Create quiz', prompt: 'Create a 10-question quiz with answers and brief explanations.' },
+  { icon: '🗂️', label: 'Create Flashcards', prompt: 'Create flashcards for quick revision, including question and answer pairs.' },
+  { icon: '🧠', label: 'Create Mind map', prompt: 'Build a mind map for this topic with main nodes and subtopics.' },
+  { icon: '📉', label: 'Analyze Data', prompt: 'Help me analyze my dataset and extract key insights and trends.' },
+  { icon: '✍️', label: 'Write content', prompt: 'Write polished content with a clear structure and engaging tone.' },
+  { icon: '💻', label: 'Code Generation', prompt: 'Generate production-ready starter code for my feature request.' },
+  { icon: '📄', label: 'Document Analysis', prompt: 'Analyze this document and summarize the main takeaways and risks.' },
+  { icon: '🌐', label: 'Translate', prompt: 'Translate this text naturally while preserving tone and context.' },
+  { icon: '🔭', label: 'Just Exploring', prompt: 'I am exploring AI tools. Ask me a few questions and guide me to the best options.' },
+];
+
 const Hero = ({ openApp, goAgentWithAuth }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [query, setQuery] = useState('');
@@ -219,6 +236,12 @@ const Hero = ({ openApp, goAgentWithAuth }) => {
 
   const launchWithQuery = () => {
     openApp('chat', query, attachedFiles);
+  };
+
+  const handleQuickAction = (action) => {
+    setQuery(action.prompt);
+    setIsFocused(true);
+    openApp('chat', action.prompt, attachedFiles);
   };
 
   useEffect(() => {
@@ -518,6 +541,21 @@ const Hero = ({ openApp, goAgentWithAuth }) => {
             Click any suggestion to fill the search box, then press <strong>Let's go</strong>
           </div>
         </div>
+      </div>
+
+      <div className="hero-action-grid" aria-label="Quick AI actions">
+        {QUICK_ACTIONS.map((action) => (
+          <button
+            key={action.label}
+            className="hac-btn"
+            onClick={() => handleQuickAction(action)}
+            title={action.label}
+            type="button"
+          >
+            <span className="hac-icon" aria-hidden="true">{action.icon}</span>
+            <span className="hac-label">{action.label}</span>
+          </button>
+        ))}
       </div>
 
       <Stats />
