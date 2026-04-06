@@ -1,0 +1,15 @@
+{
+  "goal_selected": "Great choice! 🎯 \"**{{value}}**\" - I can already think of some excellent models for that.\n\nNow, quick question:",
+  "audience_selected": "Perfect - \"**{{value}}**\". That helps a lot! 💡\n\nOne more:",
+  "level_selected": "Got it - \"**{{value}}**\". Almost there! 🚀\n\nLast question:",
+  "onboard_done": "🎉 **You're all set!** Based on what you told me, I've prepared a personalised prompt for you.",
+  "compact_intro": "Great choice! 🎯 \"**{{prompt}}**\" - I can already think of some excellent models for that.\n\nNow, quick question:",
+  "model_intro": "Based on your goal - **{{goal}}** - here are the top models I'd recommend. I'll introduce them one by one so you can get to know each one. Tap **View Details** to learn more, or **Proceed** to go straight to selecting a version.",
+  "milestone": {
+    "title": "Congratulations - you just sent your first AI prompt!",
+    "body": "You now know how to guide AI to get focused, useful results. This is one of the most valuable skills in working with AI effectively - and you've already got it.",
+    "nextTitle": "What's next: Explore AI Models",
+    "nextBody": "Now I'll introduce you to the models that can help with your specific goal. You'll see how they differ and how to pick the right one - then we'll get you set up."
+  }
+}
+

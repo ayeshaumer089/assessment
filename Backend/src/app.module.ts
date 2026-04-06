@@ -5,6 +5,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { validateEnv } from './config/env.validation';
 import { ModelsModule } from './models/models.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { ModelsModule } from './models/models.module';
     UsersModule,
     AuthModule,
     ModelsModule,
+    ChatModule,
   ],
 })
 export class AppModule {}

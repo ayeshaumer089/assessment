@@ -69,6 +69,7 @@ const Hero = ({ openApp, goAgentWithAuth }) => {
   const [attachedFiles, setAttachedFiles] = useState([]);
   const fileInputRef = useRef(null);
   const imageInputRef = useRef(null);
+  const videoInputRef = useRef(null);
   const landingInputRef = useRef(null);
   const recognitionRef = useRef(null);
 
@@ -104,6 +105,7 @@ const Hero = ({ openApp, goAgentWithAuth }) => {
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.lang = 'en-US';
       recognitionRef.current.interimResults = true;
+      recognitionRef.current.continuous = false;
       
       recognitionRef.current.onresult = (event) => {
         const transcript = Array.from(event.results)
@@ -113,6 +115,9 @@ const Hero = ({ openApp, goAgentWithAuth }) => {
         
         if (Array.from(event.results).at(-1).isFinal) {
           setIsRecording(false);
+          if (transcript.trim()) {
+            setQuery(transcript.trim());
+          }
         }
       };
       
@@ -143,8 +148,14 @@ const Hero = ({ openApp, goAgentWithAuth }) => {
       recognitionRef.current.stop();
       setIsRecording(false);
     } else {
-      recognitionRef.current.start();
-      setIsRecording(true);
+      try {
+        recognitionRef.current.start();
+        setIsRecording(true);
+        nxToast('🎤 Listening...');
+      } catch (_) {
+        setIsRecording(false);
+        nxToast('Microphone is busy. Please try again.');
+      }
     }
   };
 
@@ -178,16 +189,33 @@ const Hero = ({ openApp, goAgentWithAuth }) => {
 
   const triggerFileInput = () => fileInputRef.current?.click();
   const triggerImageInput = () => imageInputRef.current?.click();
+  const triggerVideoInput = () => videoInputRef.current?.click();
+
+  const handleVideoAttach = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    const videoFiles = files.filter((f) => f.type.startsWith('video/'));
+    if (videoFiles.length === 0) {
+      nxToast('Please select a valid video file');
+      return;
+    }
+    setAttachedFiles((prev) => [...prev, ...videoFiles]);
+    setQuery(`Analyze this video and give me key insights: "${videoFiles[0].name}"`);
+    setIsFocused(true);
+    nxToast(`🎥 ${videoFiles.length} video file(s) attached`);
+  };
 
   const handleVideoInput = async () => {
     try {
       const { blob } = await recordUserVideo({ durationMs: 4000 });
       const file = new File([blob], `video-${Date.now()}.webm`, { type: 'video/webm' });
       setAttachedFiles(prev => [...prev, file]);
-      setQuery('Analyze this short video for me.');
+      setQuery('Analyze this short video for me and suggest next best actions.');
+      setIsFocused(true);
       nxToast('🎥 Video captured and attached');
     } catch (err) {
-      nxToast(err?.message || 'Unable to capture video');
+      nxToast('Camera recording unavailable. Choose a video file instead.');
+      triggerVideoInput();
     }
   };
 
@@ -419,6 +447,7 @@ const Hero = ({ openApp, goAgentWithAuth }) => {
 
                 <input ref={fileInputRef} type="file" style={{ display: 'none' }} onChange={handleFileAttach} />
                 <input ref={imageInputRef} type="file" style={{ display: 'none' }} onChange={handleImageAttach} accept="image/*" />
+                <input ref={videoInputRef} type="file" style={{ display: 'none' }} onChange={handleVideoAttach} accept="video/*" />
 
                 <button className="hsb-go-btn" onClick={launchWithQuery}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ width: '14px', height: '14px' }}>

@@ -2,6 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MODELS, MODEL_VARS } from '../../constants';
 import Sidebar from './Sidebar';
 import RightPanel from './RightPanel';
+import { nxToast } from '../../utils/helpers';
+import { recordScreen, recordUserVideo } from '../../utils/media';
+import { getChatResponse } from '../../services/chat';
 
 const ChatHub = ({ models = [], searchQuery, setSearchQuery, attachedFiles, setAttachedFiles, currentModelId, setCurrentModelId, isObDone, onboardingAnswers, openModal }) => {
   const [messages, setMessages] = useState([]);
@@ -11,6 +14,7 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, attachedFiles, setA
   const [showCPanel, setShowCPanel] = useState(true);
   const [localAnswers, setLocalAnswers] = useState(onboardingAnswers || {});
   const [onboardPhase, setOnboardPhase] = useState(isObDone ? 'chat' : 'start');
+  const [generatedPrompt, setGeneratedPrompt] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const chatEndRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -38,6 +42,7 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, attachedFiles, setA
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.lang = 'en-US';
       recognitionRef.current.interimResults = true;
+      recognitionRef.current.continuous = false;
       
       recognitionRef.current.onresult = (event) => {
         const transcript = Array.from(event.results)
@@ -52,6 +57,7 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, attachedFiles, setA
       
       recognitionRef.current.onerror = () => {
         setIsRecording(false);
+        nxToast('Voice recognition error. Please try again.');
       };
       
       recognitionRef.current.onend = () => {
@@ -68,6 +74,7 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, attachedFiles, setA
 
   const toggleVoiceInput = () => {
     if (!recognitionRef.current) {
+      nxToast('Voice recognition not supported in this browser');
       return;
     }
     
@@ -75,8 +82,14 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, attachedFiles, setA
       recognitionRef.current.stop();
       setIsRecording(false);
     } else {
-      recognitionRef.current.start();
-      setIsRecording(true);
+      try {
+        recognitionRef.current.start();
+        setIsRecording(true);
+        nxToast('🎤 Listening...');
+      } catch (_) {
+        setIsRecording(false);
+        nxToast('Microphone is busy. Please try again.');
+      }
     }
   };
 
@@ -102,6 +115,34 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, attachedFiles, setA
 
   const triggerFileInput = () => {
     fileInputRef.current?.click();
+  };
+
+  const setPromptFromMedia = (text) => {
+    setInputValue((prev) => (prev.trim() ? `${prev}\n${text}` : text));
+  };
+
+  const handleVideoInput = async () => {
+    try {
+      const { blob } = await recordUserVideo({ durationMs: 4000 });
+      const file = new File([blob], `video-${Date.now()}.webm`, { type: 'video/webm' });
+      setAttachedFiles((prev) => [...prev, file]);
+      setPromptFromMedia('Analyze this short video and suggest next best actions.');
+      nxToast('🎥 Video captured and attached');
+    } catch (err) {
+      nxToast(err?.message || 'Unable to capture video');
+    }
+  };
+
+  const handleScreenShare = async () => {
+    try {
+      const { blob } = await recordScreen({ durationMs: 4000 });
+      const file = new File([blob], `screen-${Date.now()}.webm`, { type: 'video/webm' });
+      setAttachedFiles((prev) => [...prev, file]);
+      setPromptFromMedia('Here is a screen recording. Help me with this issue.');
+      nxToast('🖥️ Screen captured and attached');
+    } catch (err) {
+      nxToast(err?.message || 'Screen share failed');
+    }
   };
 
   const mapHomeQueryToGoal = (query) => {
@@ -199,14 +240,19 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, attachedFiles, setA
     const hadAttachments = attachedFiles.length > 0;
     if (hadAttachments) setAttachedFiles([]);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       // If we have attachments, we show questions instead of models directly
       if (hadAttachments && onboardPhase !== 'chat') {
         setIsTyping(false);
         setLocalAnswers(prev => ({ ...prev, goal: 'Analyse data or documents' }));
+        const backendGoalMsg = await fetchBackendText(
+          'goal_selected',
+          { value: 'Analyse data or documents' },
+          `Great choice! 🎯 "**Analyse data or documents**" - I can already think of some excellent models for that.\n\nNow, quick question:`,
+        );
         setMessages(prev => [...prev, {
           role: 'ai',
-          content: `Great choice! 🎯 "**Analyse data or documents**" — I can already think of some excellent models for that.\n\nNow, quick question:`,
+          content: backendGoalMsg,
           type: 'onboard_question',
           question: 'Who will be using this AI?',
           nextPhase: 'audience',
@@ -224,12 +270,17 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, attachedFiles, setA
 
       const recommended = getRecommendedModels(normalized);
       if (isDirectInput) {
+        const compactIntro = await fetchBackendText(
+          'compact_intro',
+          { prompt: normalized },
+          `Great choice! 🎯 "**${normalized}**" - I can already think of some excellent models for that.\n\nNow, quick question:`,
+        );
         setMessages(prev => [
           ...prev,
           {
             role: 'ai',
             type: 'compact_model_reco',
-            content: `Great choice! 🎯 "**${normalized}**" — I can already think of some excellent models for that.\n\nNow, quick question:`,
+            content: compactIntro,
             models: recommended,
           },
         ]);
@@ -237,17 +288,30 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, attachedFiles, setA
         return;
       }
 
+      const milestone = await fetchBackendObject('milestone', {}, {
+        title: 'Congratulations - you just sent your first AI prompt!',
+        body: "You now know how to guide AI to get focused, useful results. This is one of the most valuable skills in working with AI effectively - and you've already got it.",
+        nextTitle: "What's next: Explore AI Models",
+        nextBody: "Now I'll introduce you to the models that can help with your specific goal. You'll see how they differ and how to pick the right one - then we'll get you set up.",
+      });
+      const modelIntro = await fetchBackendText(
+        'model_intro',
+        { goal: normalized },
+        `Based on your goal - **${normalized}** - here are the top models I'd recommend. I'll introduce them one by one so you can get to know each one. Tap **View Details** to learn more, or **Proceed** to go straight to selecting a version.`,
+      );
+
       setMessages(prev => [
         ...prev,
         {
           role: 'ai',
           type: 'milestone_card',
-          content: 'Congratulations - you just sent your first AI prompt!',
+          content: milestone.title,
+          milestone,
         },
         {
           role: 'ai',
           type: 'model_intro',
-          content: `Based on your goal - **${normalized}** - here are the top models I'd recommend. I'll introduce them one by one so you can get to know each one. Tap **View Details** to learn more, or **Proceed** to go straight to selecting a version.`,
+          content: modelIntro,
         },
         ...recommended.map((model) => ({
         role: 'ai', 
@@ -296,18 +360,41 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, attachedFiles, setA
     return Array.isArray(variants) && variants.length ? variants.length : 1;
   };
 
+  const fetchBackendText = async (key, payload, fallback) => {
+    try {
+      const res = await getChatResponse(key, payload);
+      return res?.text || fallback;
+    } catch {
+      return fallback;
+    }
+  };
+
+  const fetchBackendObject = async (key, payload, fallback) => {
+    try {
+      const res = await getChatResponse(key, payload);
+      return res || fallback;
+    } catch {
+      return fallback;
+    }
+  };
+
   const onboardPick = (phase, value, icon) => {
     setMessages(prev => [...prev, { role: 'user', content: `${icon} ${value}` }]);
     setIsTyping(true);
-    setTimeout(() => {
+    setTimeout(async () => {
       setIsTyping(false);
       const newAnswers = { ...localAnswers, [phase]: value };
       setLocalAnswers(newAnswers);
       
       if (phase === 'goal') {
+        const goalMsg = await fetchBackendText(
+          'goal_selected',
+          { value },
+          `Great choice! 🎯 "**${value}**" - I can already think of some excellent models for that.\n\nNow, quick question:`,
+        );
         setMessages(prev => [...prev, {
           role: 'ai',
-          content: `Great choice! 🎯 "**${value}**" — I can already think of some excellent models for that.\n\nNow, quick question:`,
+          content: goalMsg,
           type: 'onboard_question',
           question: 'Who will be using this AI?',
           nextPhase: 'audience',
@@ -321,9 +408,14 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, attachedFiles, setA
           ]
         }]);
       } else if (phase === 'audience') {
+        const audienceMsg = await fetchBackendText(
+          'audience_selected',
+          { value },
+          `Perfect - "**${value}**". That helps a lot! 💡\n\nOne more:`,
+        );
         setMessages(prev => [...prev, {
           role: 'ai',
-          content: `Perfect — "**${value}**". That helps a lot! 💡\n\nOne more:`,
+          content: audienceMsg,
           type: 'onboard_question',
           question: 'How comfortable are you with tech / AI?',
           nextPhase: 'level',
@@ -335,9 +427,14 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, attachedFiles, setA
           ]
         }]);
       } else if (phase === 'level') {
+        const levelMsg = await fetchBackendText(
+          'level_selected',
+          { value },
+          `Got it - "**${value}**". Almost there! 🚀\n\nLast question:`,
+        );
         setMessages(prev => [...prev, {
           role: 'ai',
-          content: `Got it — "**${value}**". Almost there! 🚀\n\nLast question:`,
+          content: levelMsg,
           type: 'onboard_question',
           question: "What's your budget?",
           nextPhase: 'budget',
@@ -349,9 +446,21 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, attachedFiles, setA
           ]
         }]);
       } else if (phase === 'budget') {
+        const doneMsg = await fetchBackendText(
+          'onboard_done',
+          {},
+          `🎉 **You're all set!** Based on what you told me, I've prepared a personalised prompt for you.`,
+        );
+        const backendPrompt = await fetchBackendText('auto_prompt', {
+          goal: newAnswers.goal || '',
+          audience: newAnswers.audience || '',
+          level: newAnswers.level || '',
+          budget: value,
+        }, buildAutoPrompt());
+        setGeneratedPrompt(backendPrompt);
         setMessages(prev => [...prev, {
           role: 'ai',
-          content: `🎉 **You're all set!** Based on what you told me, I've prepared a personalised prompt for you.`,
+          content: doneMsg,
           type: 'onboard_done'
         }]);
         setOnboardPhase('chat');
@@ -402,12 +511,12 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, attachedFiles, setA
                 </div>
                 <div className="prepop-card">
                   <div className="ppc-eyebrow">✦ Your AI Prompt</div>
-                  <div className="ppc-display" style={{ whiteSpace: 'pre-wrap' }}>{buildAutoPrompt()}</div>
+                  <div className="ppc-display" style={{ whiteSpace: 'pre-wrap' }}>{generatedPrompt || buildAutoPrompt()}</div>
                   <div className="ppc-btns">
-                    <button className="ppc-btn ppc-run" onClick={() => handleSend(buildAutoPrompt())}>▶ Run prompt</button>
+                    <button className="ppc-btn ppc-run" onClick={() => handleSend(generatedPrompt || buildAutoPrompt())}>▶ Run prompt</button>
                     <button className="ppc-btn ppc-edit">✏ Edit</button>
                     <button className="ppc-btn ppc-regen">🔄 Regenerate</button>
-                    <button className="ppc-btn ppc-del" onClick={() => { setOnboardPhase('start'); setMessages([]); }}>✕ Delete</button>
+                    <button className="ppc-btn ppc-del" onClick={() => { setOnboardPhase('start'); setMessages([]); setGeneratedPrompt(''); }}>✕ Delete</button>
                   </div>
                 </div>
                 <div className="msg-meta">NexusAI Hub · prompt ready</div>
@@ -443,23 +552,23 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, attachedFiles, setA
                 {m.type === 'onboard_done' && (
                   <div className="prepop-card" style={{ marginTop: '0.75rem' }}>
                     <div className="ppc-eyebrow">✦ YOUR AI PROMPT</div>
-                    <div className="ppc-display" style={{ whiteSpace: 'pre-wrap' }}>{buildAutoPrompt()}</div>
+                    <div className="ppc-display" style={{ whiteSpace: 'pre-wrap' }}>{generatedPrompt || buildAutoPrompt()}</div>
                     <div className="ppc-btns">
-                      <button className="ppc-btn ppc-run" onClick={() => handleSend(buildAutoPrompt())}>▶ Run prompt</button>
+                      <button className="ppc-btn ppc-run" onClick={() => handleSend(generatedPrompt || buildAutoPrompt())}>▶ Run prompt</button>
                       <button className="ppc-btn ppc-edit">✏ Edit</button>
                       <button className="ppc-btn ppc-regen">🔄 Regenerate</button>
-                      <button className="ppc-btn ppc-del" onClick={() => { setOnboardPhase('start'); setMessages([]); setLocalAnswers({}); }}>✕ Delete</button>
+                      <button className="ppc-btn ppc-del" onClick={() => { setOnboardPhase('start'); setMessages([]); setLocalAnswers({}); setGeneratedPrompt(''); }}>✕ Delete</button>
                     </div>
                   </div>
                 )}
                 {m.type === 'milestone_card' && (
                   <div className="milestone-card">
                     <div className="milestone-icon">🎓</div>
-                    <h4>Congratulations - you just sent your first AI prompt!</h4>
-                    <p>You now know how to guide AI to get focused, useful results. This is one of the most valuable skills in working with AI effectively - and you've already got it.</p>
+                    <h4>{m.milestone?.title || m.content}</h4>
+                    <p>{m.milestone?.body || "You now know how to guide AI to get focused, useful results. This is one of the most valuable skills in working with AI effectively - and you've already got it."}</p>
                     <div className="milestone-next">
-                      <strong>What's next: Explore AI Models</strong>
-                      <div>Now I'll introduce you to the models that can help with your specific goal. You'll see how they differ and how to pick the right one - then we'll get you set up.</div>
+                      <strong>{m.milestone?.nextTitle || "What's next: Explore AI Models"}</strong>
+                      <div>{m.milestone?.nextBody || "Now I'll introduce you to the models that can help with your specific goal. You'll see how they differ and how to pick the right one - then we'll get you set up."}</div>
                     </div>
                   </div>
                 )}
@@ -565,12 +674,12 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, attachedFiles, setA
                     <path d="M12 2v20M2 12h20"/>
                   </svg>
                 </button>
-                <button className="inp-icon-btn" title="Video">
+                <button className="inp-icon-btn" title="Video" onClick={handleVideoInput}>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10 5-3v10l-5-3z"/>
                   </svg>
                 </button>
-                <button className="inp-icon-btn" title="Screen">
+                <button className="inp-icon-btn" title="Screen" onClick={handleScreenShare}>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
                   </svg>
