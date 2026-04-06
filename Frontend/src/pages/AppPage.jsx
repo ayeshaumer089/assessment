@@ -39,7 +39,7 @@ const AppPage = ({ activeTab, setActiveTab, goHome, goSignIn, isAuthenticated, o
     if (activeTab === 'agents' && !isAuthenticated) {
       nxToast('Please log in or sign up first to access the Agents page.');
       setActiveTab('chat');
-      goSignIn();
+      goSignIn('agents');
     }
   }, [activeTab, isAuthenticated, setActiveTab, goSignIn]);
 

@@ -6,6 +6,7 @@ import { nxToast } from '../utils/helpers';
 import AuthShell from '../components/auth/AuthShell';
 
 const SignInPage = ({ goHome, goSignUp, openApp, postAuthTab = 'chat' }) => {
+  const safePostAuthTab = ['chat', 'marketplace', 'agents', 'research'].includes(postAuthTab) ? postAuthTab : 'chat';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -25,7 +26,7 @@ const SignInPage = ({ goHome, goSignUp, openApp, postAuthTab = 'chat' }) => {
       if (data?.accessToken) {
         setAuthToken(data.accessToken);
       }
-      openApp(postAuthTab);
+      openApp(safePostAuthTab);
     } catch (err) {
       setError(err.message || 'Unable to sign in');
     } finally {
@@ -54,7 +55,7 @@ const SignInPage = ({ goHome, goSignUp, openApp, postAuthTab = 'chat' }) => {
               if (data?.accessToken) {
                 setAuthToken(data.accessToken);
               }
-              openApp(postAuthTab);
+              openApp(safePostAuthTab);
             } catch (err) {
               setError(err.message || 'Google sign in failed');
             } finally {
@@ -74,7 +75,7 @@ const SignInPage = ({ goHome, goSignUp, openApp, postAuthTab = 'chat' }) => {
     return () => {
       cancelled = true;
     };
-  }, [openApp, postAuthTab]);
+  }, [openApp, safePostAuthTab]);
 
   const handleGoogleClick = () => {
     if (!hasGoogleInitRef.current || !window.google?.accounts?.id) {

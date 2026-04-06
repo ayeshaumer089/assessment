@@ -7,6 +7,7 @@ import OnboardingOverlay from './components/ui/OnboardingOverlay';
 import { clearAuthToken, getOnboardingDone, isAuthenticated, setOnboardingDone } from './services/session';
 
 function App() {
+  const VALID_TABS = new Set(['chat', 'marketplace', 'agents', 'research']);
   const [activePage, setActivePage] = useState('landing');
   const [activeTab, setActiveTab] = useState('chat');
   const [pendingPostAuthTab, setPendingPostAuthTab] = useState('chat');
@@ -26,10 +27,13 @@ function App() {
     }
   }, []);
 
+  const resolveTab = (tab) => (VALID_TABS.has(tab) ? tab : 'chat');
+
   const openApp = (tab = 'chat', query = '', attachments = []) => {
+    const nextTab = resolveTab(tab);
     setActivePage('app');
-    setActiveTab(tab);
-    setPendingPostAuthTab('chat');
+    setActiveTab(nextTab);
+    setPendingPostAuthTab(nextTab);
     if (query) setSearchQuery(query);
     if (attachments.length > 0) setAttachedFiles(attachments);
   };
@@ -47,7 +51,8 @@ function App() {
     setActivePage('landing');
   };
 
-  const goSignIn = () => {
+  const goSignIn = (postAuthTab = 'chat') => {
+    setPendingPostAuthTab(resolveTab(postAuthTab));
     setActivePage('signin');
   };
 

@@ -5,6 +5,7 @@ import { setAuthToken } from '../services/session';
 import AuthShell from '../components/auth/AuthShell';
 
 const SignUpPage = ({ goHome, goSignIn, openApp, postAuthTab = 'chat' }) => {
+  const safePostAuthTab = ['chat', 'marketplace', 'agents', 'research'].includes(postAuthTab) ? postAuthTab : 'chat';
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -32,7 +33,7 @@ const SignUpPage = ({ goHome, goSignIn, openApp, postAuthTab = 'chat' }) => {
       if (data?.accessToken) {
         setAuthToken(data.accessToken);
       }
-      openApp(postAuthTab);
+      openApp(safePostAuthTab);
     } catch (err) {
       setError(err.message || 'Unable to sign up');
     } finally {
@@ -61,7 +62,7 @@ const SignUpPage = ({ goHome, goSignIn, openApp, postAuthTab = 'chat' }) => {
               if (data?.accessToken) {
                 setAuthToken(data.accessToken);
               }
-              openApp(postAuthTab);
+              openApp(safePostAuthTab);
             } catch (err) {
               setError(err.message || 'Google sign up failed');
             } finally {
@@ -81,7 +82,7 @@ const SignUpPage = ({ goHome, goSignIn, openApp, postAuthTab = 'chat' }) => {
     return () => {
       cancelled = true;
     };
-  }, [openApp, postAuthTab]);
+  }, [openApp, safePostAuthTab]);
 
   const handleGoogleClick = () => {
     if (!hasGoogleInitRef.current || !window.google?.accounts?.id) {
