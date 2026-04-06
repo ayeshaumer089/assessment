@@ -10,6 +10,12 @@
     "body": "You now know how to guide AI to get focused, useful results. This is one of the most valuable skills in working with AI effectively - and you've already got it.",
     "nextTitle": "What's next: Explore AI Models",
     "nextBody": "Now I'll introduce you to the models that can help with your specific goal. You'll see how they differ and how to pick the right one - then we'll get you set up."
-  }
+  },
+  "task_replies": [
+    "Absolutely! I can handle that task for you. Here's my approach:\n\n**Phase 1:** Analysis & Planning\n- Review current state\n- Identify gaps\n- Define success criteria\n\n**Phase 2:** Execution\n- Implement changes\n- Validate results\n- Document process\n\nReady to start?",
+    "Great question! Based on your request, here's what I recommend:\n\n- Start with the core functionality\n- Add error handling and edge cases\n- Include tests for validation\n\nWould you like me to begin with step 1?",
+    "I understand what you need. Let me work on this right away.\n\nI'll process your request and provide a detailed output with all the relevant information organised clearly.",
+    "Thanks for the context. I can help with: \"{{input}}\".\n\nI'll break this down into small actions and guide you through implementation and review."
+  ]
 }
 

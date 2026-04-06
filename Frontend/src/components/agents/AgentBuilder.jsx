@@ -2,12 +2,19 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import '../../styles/agents.css';
 import { nxToast } from '../../utils/helpers';
 import { recordScreen, recordUserVideo } from '../../utils/media';
+import { getChatResponse } from '../../services/chat';
+import {
+  createTask as createTaskApi,
+  deleteTask as deleteTaskApi,
+  duplicateTask as duplicateTaskApi,
+  fetchTasks as fetchTasksApi,
+  updateTask as updateTaskApi,
+} from '../../services/tasks';
 import {
   ACP_SUGGESTED,
   AGENT_TABS,
   DEFAULT_AGENTS,
   INITIAL_CONVERSATIONS,
-  INITIAL_TASKS,
   TEMPLATE_CARDS,
   UC_APPS,
 } from './agentsData';
@@ -85,7 +92,7 @@ const TOOL_LIBRARY = [
 const AgentBuilder = ({ openChatFromAgent }) => {
   const [activeTab, setActiveTab] = useState('use_cases');
   const [query, setQuery] = useState('');
-  const [tasks, setTasks] = useState(INITIAL_TASKS);
+  const [tasks, setTasks] = useState([]);
   const [convMap, setConvMap] = useState(INITIAL_CONVERSATIONS);
   const [activeTaskId, setActiveTaskId] = useState(null);
   const [taskInput, setTaskInput] = useState('');
@@ -127,6 +134,12 @@ const AgentBuilder = ({ openChatFromAgent }) => {
   const convFileInputRef = useRef(null);
   const convImageInputRef = useRef(null);
   const [openTaskMenuId, setOpenTaskMenuId] = useState(null);
+
+  const mapDbTask = (t) => ({
+    id: t._id || t.id,
+    name: t.name,
+    completed: Boolean(t.completed),
+  });
 
   const filteredSuggestions = useMemo(() => {
     if (!query.trim()) return ACP_SUGGESTED[activeTab] || [];
@@ -172,17 +185,39 @@ const AgentBuilder = ({ openChatFromAgent }) => {
     return () => recognitionRef.current?.stop();
   }, []);
 
-  const addTask = () => {
+  useEffect(() => {
+    const abortController = new AbortController();
+    fetchTasksApi(abortController.signal)
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setTasks(data.map(mapDbTask));
+        }
+      })
+      .catch((err) => {
+        if (err?.name !== 'AbortError') {
+          nxToast('Failed to load tasks');
+        }
+      });
+    return () => abortController.abort();
+  }, []);
+
+  const addTask = async () => {
     const name = (taskInput || `New Task #${tasks.length + 1}`).trim();
-    const id = Date.now();
-    setTasks((prev) => [...prev, { id, name, completed: false }]);
-    setConvMap((prev) => ({ ...prev, [id]: [] }));
-    setTaskInput('');
-    setActiveTaskId(id);
-    nxToast('✅ Task created');
+    if (!name) return;
+    try {
+      const created = await createTaskApi(name);
+      const task = mapDbTask(created);
+      setTasks((prev) => [...prev, task]);
+      setConvMap((prev) => ({ ...prev, [task.id]: [] }));
+      setTaskInput('');
+      setActiveTaskId(task.id);
+      nxToast('✅ Task created');
+    } catch {
+      nxToast('Unable to create task');
+    }
   };
 
-  const sendTaskMessage = (forcedText) => {
+  const sendTaskMessage = async (forcedText) => {
     if (!activeTaskId) return;
     const text = (forcedText ?? convInput).trim();
     if (!text) return;
@@ -191,51 +226,81 @@ const AgentBuilder = ({ openChatFromAgent }) => {
       [activeTaskId]: [
         ...(prev[activeTaskId] || []),
         { role: 'user', text, time: getTimeLabel() },
-        { role: 'agent', text: randomReply(), time: getTimeLabel() },
       ],
     }));
     setConvInput('');
+    try {
+      const res = await getChatResponse('task_replies', { input: text });
+      const aiText = res?.text || randomReply();
+      setConvMap((prev) => ({
+        ...prev,
+        [activeTaskId]: [
+          ...(prev[activeTaskId] || []),
+          { role: 'agent', text: aiText, time: getTimeLabel() },
+        ],
+      }));
+    } catch {
+      setConvMap((prev) => ({
+        ...prev,
+        [activeTaskId]: [
+          ...(prev[activeTaskId] || []),
+          { role: 'agent', text: randomReply(), time: getTimeLabel() },
+        ],
+      }));
+    }
   };
 
-  const editTask = (taskId) => {
+  const editTask = async (taskId) => {
     const existing = tasks.find((t) => t.id === taskId);
     if (!existing) return;
     const updated = window.prompt('Edit task name', existing.name);
     if (updated === null) return;
     const nextName = updated.trim();
     if (!nextName) return;
-    setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, name: nextName } : t)));
-    setOpenTaskMenuId(null);
+    try {
+      const saved = await updateTaskApi(taskId, { name: nextName });
+      const mapped = mapDbTask(saved);
+      setTasks((prev) => prev.map((t) => (t.id === taskId ? { ...t, name: mapped.name } : t)));
+      setOpenTaskMenuId(null);
+    } catch {
+      nxToast('Unable to update task');
+    }
   };
 
-  const duplicateTask = (taskId) => {
-    const existing = tasks.find((t) => t.id === taskId);
-    if (!existing) return;
-    const id = Date.now();
-    const copyName = `${existing.name} (copy)`;
-    setTasks((prev) => {
-      const idx = prev.findIndex((t) => t.id === taskId);
-      const item = { id, name: copyName, completed: false };
-      if (idx < 0) return [...prev, item];
-      const next = [...prev];
-      next.splice(idx + 1, 0, item);
-      return next;
-    });
-    setConvMap((prev) => ({ ...prev, [id]: [...(prev[taskId] || [])] }));
-    setOpenTaskMenuId(null);
-    nxToast('📋 Task duplicated');
+  const duplicateTask = async (taskId) => {
+    try {
+      const duplicated = await duplicateTaskApi(taskId);
+      const item = mapDbTask(duplicated);
+      setTasks((prev) => {
+        const idx = prev.findIndex((t) => t.id === taskId);
+        if (idx < 0) return [...prev, item];
+        const next = [...prev];
+        next.splice(idx + 1, 0, item);
+        return next;
+      });
+      setConvMap((prev) => ({ ...prev, [item.id]: [...(prev[taskId] || [])] }));
+      setOpenTaskMenuId(null);
+      nxToast('📋 Task duplicated');
+    } catch {
+      nxToast('Unable to duplicate task');
+    }
   };
 
-  const deleteTask = (taskId) => {
-    setTasks((prev) => prev.filter((t) => t.id !== taskId));
-    setConvMap((prev) => {
-      const next = { ...prev };
-      delete next[taskId];
-      return next;
-    });
-    if (activeTaskId === taskId) setActiveTaskId(null);
-    setOpenTaskMenuId(null);
-    nxToast('🗑️ Task deleted');
+  const deleteTask = async (taskId) => {
+    try {
+      await deleteTaskApi(taskId);
+      setTasks((prev) => prev.filter((t) => t.id !== taskId));
+      setConvMap((prev) => {
+        const next = { ...prev };
+        delete next[taskId];
+        return next;
+      });
+      if (activeTaskId === taskId) setActiveTaskId(null);
+      setOpenTaskMenuId(null);
+      nxToast('🗑️ Task deleted');
+    } catch {
+      nxToast('Unable to delete task');
+    }
   };
 
   useEffect(() => {
@@ -276,7 +341,7 @@ const AgentBuilder = ({ openChatFromAgent }) => {
     setAgentChatInput('');
   };
 
-  const saveDraftAgent = () => {
+  const saveDraftAgent = async () => {
     const resolvedName = (createData.name || '').trim() || 'My Custom Agent';
     const agent = {
       name: resolvedName,
@@ -295,11 +360,16 @@ const AgentBuilder = ({ openChatFromAgent }) => {
     setMode('workspace');
     setShowUseCaseDetail(false);
 
-    const taskId = Date.now();
     const taskName = `${agent.name} setup`;
-    setTasks((prev) => [...prev, { id: taskId, name: taskName, completed: false }]);
-    setConvMap((prev) => ({ ...prev, [taskId]: [] }));
-    setActiveTaskId(taskId);
+    try {
+      const createdTask = await createTaskApi(taskName);
+      const mappedTask = mapDbTask(createdTask);
+      setTasks((prev) => [...prev, mappedTask]);
+      setConvMap((prev) => ({ ...prev, [mappedTask.id]: [] }));
+      setActiveTaskId(mappedTask.id);
+    } catch {
+      nxToast('Agent saved, but setup task creation failed.');
+    }
   };
 
   const openCustomAgentFlow = () => {
@@ -355,7 +425,8 @@ const AgentBuilder = ({ openChatFromAgent }) => {
     if (!files.length) return;
     setAttachedFiles((prev) => [...prev, ...files]);
     const prompt = `Help me with this file: "${files[0].name}"`;
-    if (target === 'conversation') setConvInput(prompt);
+    if (target === 'agent-chat') setAgentChatInput(prompt);
+    else if (target === 'task' || target === 'conversation') setConvInput(prompt);
     else setQuery(prompt);
     nxToast(`${files.length} file(s) attached`);
   };
@@ -365,29 +436,36 @@ const AgentBuilder = ({ openChatFromAgent }) => {
     if (!files.length) return;
     setAttachedFiles((prev) => [...prev, ...files]);
     const prompt = `Analyze this image: "${files[0].name}"`;
-    if (target === 'conversation') setConvInput(prompt);
+    if (target === 'agent-chat') setAgentChatInput(prompt);
+    else if (target === 'task' || target === 'conversation') setConvInput(prompt);
     else setQuery(prompt);
     nxToast(`${files.length} image(s) attached`);
   };
 
-  const handleVideoInput = async () => {
+  const handleVideoInput = async (target = 'workspace') => {
     try {
       const { blob } = await recordUserVideo({ durationMs: 4000 });
       const file = new File([blob], `video-${Date.now()}.webm`, { type: 'video/webm' });
       setAttachedFiles((prev) => [...prev, file]);
-      setQuery('Analyze this short video for me.');
+      const prompt = 'Analyze this short video for me.';
+      if (target === 'agent-chat') setAgentChatInput(prompt);
+      else if (target === 'task' || target === 'conversation') setConvInput(prompt);
+      else setQuery(prompt);
       nxToast('🎥 Video captured and attached');
     } catch (err) {
       nxToast(err?.message || 'Unable to capture video');
     }
   };
 
-  const handleScreenShare = async () => {
+  const handleScreenShare = async (target = 'workspace') => {
     try {
       const { blob } = await recordScreen({ durationMs: 4000 });
       const file = new File([blob], `screen-${Date.now()}.webm`, { type: 'video/webm' });
       setAttachedFiles((prev) => [...prev, file]);
-      setQuery('Here is a screen recording. Help with this.');
+      const prompt = 'Here is a screen recording. Help with this.';
+      if (target === 'agent-chat') setAgentChatInput(prompt);
+      else if (target === 'task' || target === 'conversation') setConvInput(prompt);
+      else setQuery(prompt);
       nxToast('🖥️ Screen captured and attached');
     } catch (err) {
       nxToast(err?.message || 'Screen share failed');
@@ -448,18 +526,18 @@ const AgentBuilder = ({ openChatFromAgent }) => {
                   onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), sendAgentChat())}
                 />
                 <div className="conv-composer-tools">
-                  <button className={`agents-tool-btn purple ${isRecording && voiceTarget === 'agent-chat' ? 'active' : ''}`} onClick={() => toggleVoiceInput('agent-chat')}>
+                  <button className={`agents-tool-btn purple ${isRecording && voiceTarget === 'agent-chat' ? 'active' : ''}`} title="Voice conversation" onClick={() => toggleVoiceInput('agent-chat')}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
                   </button>
-                  <button className="agents-tool-btn orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="14" width="20" height="7" rx="2"/></svg></button>
-                  <button className="agents-tool-btn blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="23 7 16 12 23 17 23 7"/></svg></button>
-                  <button className="agents-tool-btn teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2"/></svg></button>
-                  <button className="agents-tool-btn rose" onClick={() => convFileInputRef.current?.click()}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
-                  <button className="agents-tool-btn green" onClick={() => convImageInputRef.current?.click()}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></button>
-                  <button className="agents-tip-btn">✦</button>
+                  <button className={`agents-tool-btn orange ${isRecording && voiceTarget === 'agent-chat' ? 'active' : ''}`} title="Voice typing" onClick={() => toggleVoiceInput('agent-chat')}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="14" width="20" height="7" rx="2"/></svg></button>
+                  <button className="agents-tool-btn blue" title="Video input" onClick={() => handleVideoInput('agent-chat')}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="23 7 16 12 23 17 23 7"/></svg></button>
+                  <button className="agents-tool-btn teal" title="Screen sharing" onClick={() => handleScreenShare('agent-chat')}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="3" width="20" height="14" rx="2"/></svg></button>
+                  <button className="agents-tool-btn rose" title="Attach file" onClick={() => convFileInputRef.current?.click()}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg></button>
+                  <button className="agents-tool-btn green" title="Upload image" onClick={() => convImageInputRef.current?.click()}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></button>
+                  <button className="agents-tip-btn" title="Prompt tips" onClick={() => setAgentChatInput((prev) => (prev ? `${prev}\nHelp me break this into clear next steps.` : 'Help me break this into clear next steps.'))}>✦</button>
                   <span className="conv-composer-agent">Agent</span>
-                  <input ref={convFileInputRef} type="file" style={{ display: 'none' }} accept=".pdf,.doc,.docx,.txt,.csv" onChange={(e) => handleAttachFile(e, 'conversation')} />
-                  <input ref={convImageInputRef} type="file" style={{ display: 'none' }} accept="image/*" onChange={(e) => handleAttachImage(e, 'conversation')} />
+                  <input ref={convFileInputRef} type="file" style={{ display: 'none' }} accept=".pdf,.doc,.docx,.txt,.csv" onChange={(e) => handleAttachFile(e, 'agent-chat')} />
+                  <input ref={convImageInputRef} type="file" style={{ display: 'none' }} accept="image/*" onChange={(e) => handleAttachImage(e, 'agent-chat')} />
                 </div>
               </div>
               <button className="conv-send-round" onClick={() => sendAgentChat()}>➤</button>
@@ -537,9 +615,15 @@ const AgentBuilder = ({ openChatFromAgent }) => {
               <input
                 type="checkbox"
                 checked={task.completed}
-                onChange={(e) => {
+                onChange={async (e) => {
                   e.stopPropagation();
-                  setTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, completed: !t.completed } : t)));
+                  const nextCompleted = !task.completed;
+                  try {
+                    await updateTaskApi(task.id, { completed: nextCompleted });
+                    setTasks((prev) => prev.map((t) => (t.id === task.id ? { ...t, completed: nextCompleted } : t)));
+                  } catch {
+                    nxToast('Unable to update task');
+                  }
                 }}
               />
               <span>{task.name}</span>

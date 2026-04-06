@@ -54,6 +54,15 @@ export class ChatService {
       return { text: this.renderTemplate(value, payload) };
     }
 
+    if (Array.isArray(value)) {
+      if (value.length === 0) return { text: '' };
+      const picked = value[Math.floor(Math.random() * value.length)];
+      if (typeof picked === 'string') {
+        return { text: this.renderTemplate(picked, payload) };
+      }
+      return { text: '' };
+    }
+
     if (typeof value === 'object') {
       const out: Record<string, unknown> = {};
       Object.entries(value as Record<string, unknown>).forEach(([k, v]) => {
