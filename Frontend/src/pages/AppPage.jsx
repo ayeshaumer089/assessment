@@ -83,7 +83,12 @@ const AppPage = ({ activeTab, setActiveTab, goHome, goSignIn, isAuthenticated, o
         )}
         
         {activeTab === 'agents' && (
-          <AgentBuilder />
+          <AgentBuilder
+            openChatFromAgent={(promptText) => {
+              if (promptText) setSearchQuery(`__agent_prompt__:${promptText}`);
+              setActiveTab('chat');
+            }}
+          />
         )}
         
         {activeTab === 'research' && (

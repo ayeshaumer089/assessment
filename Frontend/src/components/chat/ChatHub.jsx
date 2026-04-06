@@ -135,7 +135,9 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, attachedFiles, setA
 
   useEffect(() => {
     if (!searchQuery) return;
-    const normalized = searchQuery.trim();
+    const isAgentPrompt = searchQuery.startsWith('__agent_prompt__:');
+    const rawQuery = isAgentPrompt ? searchQuery.replace('__agent_prompt__:', '') : searchQuery;
+    const normalized = rawQuery.trim();
     if (!normalized) {
       setSearchQuery('');
       return;
@@ -145,11 +147,16 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, attachedFiles, setA
     }
 
     lastAutoQueryRef.current = normalized;
-    const mappedGoal = mapHomeQueryToGoal(normalized);
-    if (mappedGoal && messages.length === 0) {
-      onboardPick('goal', mappedGoal.label, mappedGoal.icon);
-    } else {
+    if (isAgentPrompt) {
+      setInputValue(normalized);
       handleSend(normalized);
+    } else {
+      const mappedGoal = mapHomeQueryToGoal(normalized);
+      if (mappedGoal && messages.length === 0) {
+        onboardPick('goal', mappedGoal.label, mappedGoal.icon);
+      } else {
+        handleSend(normalized);
+      }
     }
     setSearchQuery('');
   }, [searchQuery]);
