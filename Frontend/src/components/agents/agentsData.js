@@ -113,11 +113,54 @@ export const UC_APPS = {
 };
 
 export const DEFAULT_AGENTS = [
-  { name: 'Research Agent', icon: '🔍', model: 'GPT-5.4', tools: ['Web search'] },
-  { name: 'Support Agent', icon: '💼', model: 'GPT-5.4', tools: ['Ticketing'] },
-  { name: 'Code Review Agent', icon: '💻', model: 'Claude Opus 4.6', tools: ['GitHub'] },
-  { name: 'Data Analysis Agent', icon: '📊', model: 'Gemini', tools: ['Sheets'] },
-  { name: 'Content Writer Agent', icon: '✍️', model: 'Claude Opus 4.6', tools: ['Marketing'] },
+  {
+    name: 'Research Agent',
+    icon: '🔍',
+    model: 'GPT-5',
+    tools: ['Web Search', 'Summariser', 'Citation Builder'],
+    desc: 'Automates web research, synthesises findings from multiple sources, and delivers structured reports.',
+    memory: 'Short-term',
+  },
+  {
+    name: 'Customer Support Agent',
+    icon: '💼',
+    model: 'Claude Sonnet 4.6',
+    tools: ['Ticket System', 'Knowledge Base', 'CRM'],
+    desc: 'Handles product questions, order issues, billing inquiries, and technical problems.',
+    memory: 'Short-term',
+  },
+  {
+    name: 'Code Review Agent',
+    icon: '💻',
+    model: 'Claude Opus 4.6',
+    tools: ['GitHub API', 'AST Parser', 'Linter'],
+    desc: 'Reviews pull requests, flags bugs, suggests improvements, and explains code.',
+    memory: 'Short-term',
+  },
+  {
+    name: 'Data Analysis Agent',
+    icon: '📊',
+    model: 'GPT-5',
+    tools: ['CSV Parser', 'Chart Builder', 'Statistics'],
+    desc: 'Processes spreadsheets, generates insights, and creates visualisations.',
+    memory: 'Short-term',
+  },
+  {
+    name: 'Content Writer Agent',
+    icon: '✍️',
+    model: 'GPT-5',
+    tools: ['SEO Optimiser', 'Tone Checker', 'Plagiarism Scan'],
+    desc: 'Creates blog posts, social content, email campaigns, and marketing copy.',
+    memory: 'Short-term',
+  },
+  {
+    name: 'Sales Outreach Agent',
+    icon: '🤝',
+    model: 'GPT-5 Turbo',
+    tools: ['Email Sender', 'CRM', 'Lead Scorer'],
+    desc: 'Automates personalised outreach and follows up with leads.',
+    memory: 'Short-term',
+  },
 ];
 
 export const TEMPLATE_CARDS = DEFAULT_AGENTS;
