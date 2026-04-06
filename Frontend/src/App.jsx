@@ -9,6 +9,7 @@ import { clearAuthToken, getOnboardingDone, isAuthenticated, setOnboardingDone }
 function App() {
   const [activePage, setActivePage] = useState('landing');
   const [activeTab, setActiveTab] = useState('chat');
+  const [pendingPostAuthTab, setPendingPostAuthTab] = useState('chat');
   const [searchQuery, setSearchQuery] = useState('');
   const [attachedFiles, setAttachedFiles] = useState([]);
   const [currentModelId, setCurrentModelId] = useState('gpt5');
@@ -28,8 +29,18 @@ function App() {
   const openApp = (tab = 'chat', query = '', attachments = []) => {
     setActivePage('app');
     setActiveTab(tab);
+    setPendingPostAuthTab('chat');
     if (query) setSearchQuery(query);
     if (attachments.length > 0) setAttachedFiles(attachments);
+  };
+
+  const goAgentWithAuth = () => {
+    if (isAuthenticated()) {
+      openApp('agents');
+      return;
+    }
+    setPendingPostAuthTab('agents');
+    setActivePage('signin');
   };
 
   const goHome = () => {
@@ -59,11 +70,11 @@ function App() {
   return (
     <div className="app-container">
       {activePage === 'landing' ? (
-        <LandingPage openApp={openApp} goSignIn={goSignIn} />
+        <LandingPage openApp={openApp} goSignIn={goSignIn} goAgentWithAuth={goAgentWithAuth} />
       ) : activePage === 'signin' ? (
-        <SignInPage goHome={goHome} goSignUp={goSignUp} openApp={openApp} />
+        <SignInPage goHome={goHome} goSignUp={goSignUp} openApp={openApp} postAuthTab={pendingPostAuthTab} />
       ) : activePage === 'signup' ? (
-        <SignUpPage goHome={goHome} goSignIn={goSignIn} openApp={openApp} />
+        <SignUpPage goHome={goHome} goSignIn={goSignIn} openApp={openApp} postAuthTab={pendingPostAuthTab} />
       ) : (
         <AppPage 
           activeTab={activeTab} 

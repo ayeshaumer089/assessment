@@ -13,7 +13,7 @@ import FooterStrip from '../components/layout/FooterStrip';
 import ModelDetailModal from '../components/ui/ModelDetailModal';
 import { MODELS } from '../constants';
 
-const LandingPage = ({ openApp, goSignIn }) => {
+const LandingPage = ({ openApp, goSignIn, goAgentWithAuth }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedModel, setSelectedModel] = useState(null);
 
@@ -29,7 +29,7 @@ const LandingPage = ({ openApp, goSignIn }) => {
     <div id="landing-page" className="page active">
       <Navbar goHome={goHome} openApp={openApp} goSignIn={goSignIn} />
       
-      <Hero openApp={openApp} />
+      <Hero openApp={openApp} goAgentWithAuth={goAgentWithAuth} />
 
       <FeaturedModels openApp={openApp} openModal={openModal} />
 

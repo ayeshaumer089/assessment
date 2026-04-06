@@ -11,6 +11,7 @@ import { ModelsModule } from './models/models.module';
     ConfigModule.forRoot({
       isGlobal: true,
       validate: validateEnv,
+      envFilePath: ['.env', '../.env'],
     }),
     MongooseModule.forRootAsync({
       inject: [ConfigService],

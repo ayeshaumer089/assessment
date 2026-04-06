@@ -41,7 +41,7 @@ const SQ_DATA = {
   ],
 };
 
-const Hero = ({ openApp }) => {
+const Hero = ({ openApp, goAgentWithAuth }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [query, setQuery] = useState('');
   const [phase, setPhase] = useState('input'); // 'input', 'welcome', 'questions', 'building'
@@ -382,7 +382,7 @@ const Hero = ({ openApp }) => {
 
                 <div className="hsb-bar-sep"></div>
 
-                <button className="hsb-computer-chip" id="computer-agent-chip" title="Agent works for you" onClick={() => nxToast('Agent panel placeholder')}>
+                <button className="hsb-computer-chip" id="computer-agent-chip" title="Agent works for you" onClick={goAgentWithAuth}>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '13px', height: '13px' }}>
                     <rect x="2" y="3" width="20" height="14" rx="2" />
                     <polyline points="8 21 12 17 16 21" />

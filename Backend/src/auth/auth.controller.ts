@@ -1,6 +1,7 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
 import { AuthService } from './auth.service';
+import { GoogleAuthDto } from './dto/google-auth.dto';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -18,6 +19,23 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
+  }
+
+  @Post('google')
+  @HttpCode(HttpStatus.OK)
+  googleAuth(@Body() dto: GoogleAuthDto) {
+    return this.authService.googleAuth(dto.credential);
+  }
+
+  @Post('google/code')
+  @HttpCode(HttpStatus.OK)
+  googleAuthCode(@Body() dto: { code: string }) {
+    return this.authService.googleAuthCode(dto.code);
+  }
+
+  @Get('google/config')
+  getGoogleConfig() {
+    return this.authService.getGoogleConfig();
   }
 
   @UseGuards(JwtAuthGuard)

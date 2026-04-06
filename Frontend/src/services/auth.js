@@ -26,3 +26,13 @@ export function register(payload) {
 export function logout(token) {
   return request('/auth/logout', {}, token);
 }
+
+export function googleAuth(credential) {
+  return request('/auth/google', { credential });
+}
+
+export function getGoogleAuthConfig() {
+  return apiRequest('/auth/google/config', {
+    method: 'GET',
+  });
+}
