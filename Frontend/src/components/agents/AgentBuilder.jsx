@@ -94,6 +94,21 @@ const TOOL_LIBRARY = [
   { name: 'Custom Function', desc: 'Define your own tool with a JSON schema' },
 ];
 
+const INITIAL_CREATE_DATA = {
+  name: '',
+  type: 'Customer Support',
+  purpose: '',
+  audience: 'Customers',
+  tone: 'Professional',
+  avoid: '',
+  success: '',
+  systemPrompt: '',
+  tools: [],
+  memory: 'Short-term Only',
+  scenarios: [],
+  manualScenario: '',
+};
+
 const AgentBuilder = ({ openChatFromAgent }) => {
   const [activeTab, setActiveTab] = useState('use_cases');
   const [query, setQuery] = useState('');
@@ -114,20 +129,7 @@ const AgentBuilder = ({ openChatFromAgent }) => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [mode, setMode] = useState('workspace');
   const [createStep, setCreateStep] = useState(0);
-  const [createData, setCreateData] = useState({
-    name: '',
-    type: 'Customer Support',
-    purpose: '',
-    audience: 'Customers',
-    tone: 'Professional',
-    avoid: '',
-    success: '',
-    systemPrompt: '',
-    tools: [],
-    memory: 'Short-term Only',
-    scenarios: [],
-    manualScenario: '',
-  });
+  const [createData, setCreateData] = useState(INITIAL_CREATE_DATA);
   const [builderAgentId, setBuilderAgentId] = useState(null);
   const [savedTemplates, setSavedTemplates] = useState([]);
   const [draftAgent, setDraftAgent] = useState({ name: '', purpose: '', model: 'GPT-5', tools: [], memory: 'short' });
@@ -510,24 +512,17 @@ const AgentBuilder = ({ openChatFromAgent }) => {
 
     if (!myAgents.find((a) => a.name === agent.name)) setMyAgents((prev) => [...prev, agent]);
     setBuilderAgentId(null);
+    setCreateData(INITIAL_CREATE_DATA);
+    setCreateStep(0);
     setShowCreateModal(false);
     setShowInlineLibrary(false);
     setMode('workspace');
     setShowUseCaseDetail(false);
-
-    const taskName = `${agent.name} setup`;
-    try {
-      const createdTask = await createTaskApi(taskName);
-      const mappedTask = mapDbTask(createdTask);
-      setTasks((prev) => [...prev, mappedTask]);
-      setConvMap((prev) => ({ ...prev, [mappedTask.id]: [] }));
-      setActiveTaskId(mappedTask.id);
-    } catch {
-      nxToast('Agent saved, but setup task creation failed.');
-    }
+    nxToast('✅ Agent published successfully');
   };
 
   const openCustomAgentFlow = async () => {
+    setCreateData(INITIAL_CREATE_DATA);
     setCreateStep(0);
     setBuilderAgentId(null);
     setShowCreateModal(true);
@@ -1143,7 +1138,7 @@ const AgentBuilder = ({ openChatFromAgent }) => {
                   <span className="inline-pill">Default Agents</span>
                 </div>
                 <div className="template-grid">
-                  {DEFAULT_AGENTS.map((agent) => (
+                  {allTemplateCards.map((agent) => (
                     <div key={agent.name} className="template-card lib-card" onClick={() => launchAgent(agent)}>
                       <h5>{agent.icon} {agent.name}</h5>
                       <p>{agent.desc}</p>
@@ -1420,14 +1415,32 @@ const AgentBuilder = ({ openChatFromAgent }) => {
       )}
 
       {showCreateModal && (
-        <div className="ag-overlay" onClick={() => setShowCreateModal(false)}>
+        <div
+          className="ag-overlay"
+          onClick={() => {
+            setShowCreateModal(false);
+            setBuilderAgentId(null);
+            setCreateData(INITIAL_CREATE_DATA);
+            setCreateStep(0);
+          }}
+        >
           <div className="ag-modal ag-modal-wide" onClick={(e) => e.stopPropagation()}>
             <div className="ag-modal-head">
               <div>
                 <strong>{['Define your agent\'s purpose', 'Write the system prompt', 'Connect tools & APIs', 'Set up memory', 'Test & iterate', 'Deploy & monitor'][createStep]}</strong>
                 <div style={{ fontSize: '.78rem', color: 'var(--text3)' }}>Step {createStep + 1} of 6</div>
               </div>
-              <button className="btn btn-ghost" onClick={() => setShowCreateModal(false)}>✕</button>
+              <button
+                className="btn btn-ghost"
+                onClick={() => {
+                  setShowCreateModal(false);
+                  setBuilderAgentId(null);
+                  setCreateData(INITIAL_CREATE_DATA);
+                  setCreateStep(0);
+                }}
+              >
+                ✕
+              </button>
             </div>
             <div className="ag-step-tabs ag-step-tabs-rich">
                {['Purpose', 'System Prompt', 'Tools & APIs', 'Memory', 'Test', 'Deploy'].map((s, i) => (
@@ -1549,6 +1562,9 @@ const AgentBuilder = ({ openChatFromAgent }) => {
                   }
                   if (createStep === 0) {
                     setShowCreateModal(false);
+                    setBuilderAgentId(null);
+                    setCreateData(INITIAL_CREATE_DATA);
+                    setCreateStep(0);
                   } else {
                     setCreateStep((s) => Math.max(0, s - 1));
                   }
