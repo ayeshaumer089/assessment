@@ -134,6 +134,10 @@ const AgentBuilder = ({ openChatFromAgent }) => {
   const convFileInputRef = useRef(null);
   const convImageInputRef = useRef(null);
   const [openTaskMenuId, setOpenTaskMenuId] = useState(null);
+  const [showEditConfigModal, setShowEditConfigModal] = useState(false);
+  const [editConfigStep, setEditConfigStep] = useState(0);
+  const [showAgentDashboard, setShowAgentDashboard] = useState(false);
+  const [urlCopied, setUrlCopied] = useState(false);
 
   const mapDbTask = (t) => ({
     id: t._id || t.id,
@@ -488,7 +492,264 @@ const AgentBuilder = ({ openChatFromAgent }) => {
     }
   };
 
+  const handleCopyEndpointUrl = () => {
+    const url = `https://api.nexusai.app/agents/${(activeAgent?.name || 'agent').toLowerCase().replace(/\s+/g, '-')}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setUrlCopied(true);
+      nxToast('🔗 Endpoint URL copied!');
+      setTimeout(() => setUrlCopied(false), 2000);
+    }).catch(() => nxToast('Failed to copy URL'));
+  };
+
+  const EDIT_CONFIG_STEPS = ['Purpose', 'System Prompt', 'Tools & APIs', 'Memory', 'Test', 'Deploy'];
+
+  const EditConfigModal = () => {
+    const [localData, setLocalData] = useState({
+      name: activeAgent?.name || '',
+      type: 'Customer Support',
+      purpose: activeAgent?.desc || '',
+      audience: 'Customers',
+      tone: 'Professional',
+      avoid: '',
+      success: '',
+      systemPrompt: `You are ${activeAgent?.name || 'my agent'}.\n\nHelp users effectively with a professional tone.`,
+      tools: activeAgent?.tools || [],
+      memory: activeAgent?.memory || 'Short-term',
+    });
+
+    const types = ['Customer Support', 'Research & Data', 'Code & Dev', 'Sales & CRM', 'Content & Writing', 'Operations', 'Finance & Reports', 'Something else'];
+    const audiences = ['Customers', 'Internal team', 'Developers', 'Executives'];
+    const tones = ['Professional', 'Friendly', 'Concise', 'Detailed'];
+    const memoryOptions = ['Short-term Only', 'Long-term Memory', 'No Memory'];
+
+    const stepContent = () => {
+      switch (editConfigStep) {
+        case 0:
+          return (
+            <div className="ag-rich-body">
+              <div className="ag-step-title">STEP 1 OF 6</div>
+              <div className="ag-step-copy">Answer a few quick questions — we'll use your answers to build the perfect agent.</div>
+              <div className="ag-field" style={{marginBottom:'1rem'}}>
+                <label style={{fontSize:'.9rem',fontWeight:700}}>🧑 What do you want to call your agent?</label>
+                <input value={localData.name} onChange={e => setLocalData(p=>({...p,name:e.target.value}))} placeholder="e.g. Support Bot, Research Assistant, Code Reviewer..." />
+              </div>
+              <div className="ag-field" style={{marginBottom:'1rem'}}>
+                <label style={{fontSize:'.9rem',fontWeight:700}}>🤖 What kind of agent is this?</label>
+                <div className="ag-chip-row" style={{marginTop:6}}>
+                  {types.map(t => <button key={t} className={`ag-chip ${localData.type===t?'on':''}`} onClick={()=>setLocalData(p=>({...p,type:t}))}>{t}</button>)}
+                </div>
+              </div>
+              <div className="ag-field" style={{marginBottom:'1rem'}}>
+                <label style={{fontSize:'.9rem',fontWeight:700}}>🎯 What's the main job? <span style={{fontWeight:400,color:'var(--text3)'}}>(in plain English)</span></label>
+                <textarea rows={4} value={localData.purpose} onChange={e=>setLocalData(p=>({...p,purpose:e.target.value}))} placeholder="e.g. Answer customer questions, handle returns, and create support tickets for issues we can't resolve." style={{resize:'vertical'}} />
+                <div style={{display:'flex',flexWrap:'wrap',gap:6,marginTop:8}}>
+                  {['Answer customer questions and escalate unresolved issues','Search the web and write structured research reports','Review code for bugs and suggest improvements','Draft emails, posts, and marketing content','Summarise meetings and extract action items'].map(s=>(
+                    <button key={s} className="ag-chip" style={{fontSize:'.74rem',borderColor:'var(--accent-border)',color:'var(--accent)'}} onClick={()=>setLocalData(p=>({...p,purpose:s}))}>{s}</button>
+                  ))}
+                </div>
+              </div>
+              <div className="ag-field">
+                <label style={{fontSize:'.9rem',fontWeight:700}}>👥 Who will be talking to this agent?</label>
+                <div className="ag-chip-row" style={{marginTop:6}}>
+                  {audiences.map(a=><button key={a} className={`ag-chip ${localData.audience===a?'on':''}`} onClick={()=>setLocalData(p=>({...p,audience:a}))}>{a}</button>)}
+                </div>
+              </div>
+            </div>
+          );
+        case 1:
+          return (
+            <div className="ag-rich-body">
+              <div className="ag-step-title">STEP 2 OF 6</div>
+              <div className="ag-step-copy">Define how your agent should behave and respond.</div>
+              <div className="ag-field">
+                <label style={{fontSize:'.9rem',fontWeight:700}}>System Prompt</label>
+                <textarea rows={10} value={localData.systemPrompt} onChange={e=>setLocalData(p=>({...p,systemPrompt:e.target.value}))} style={{resize:'vertical',fontFamily:'monospace',fontSize:'.82rem'}} />
+              </div>
+              <div className="ag-field">
+                <label style={{fontSize:'.9rem',fontWeight:700}}>Tone</label>
+                <div className="ag-chip-row" style={{marginTop:6}}>
+                  {tones.map(t=><button key={t} className={`ag-chip ${localData.tone===t?'on':''}`} onClick={()=>setLocalData(p=>({...p,tone:t}))}>{t}</button>)}
+                </div>
+              </div>
+              <div className="ag-field">
+                <label style={{fontSize:'.9rem',fontWeight:700}}>What should the agent avoid?</label>
+                <input value={localData.avoid} onChange={e=>setLocalData(p=>({...p,avoid:e.target.value}))} placeholder="e.g. Never discuss pricing, avoid medical advice..." />
+              </div>
+            </div>
+          );
+        case 2:
+          return (
+            <div className="ag-rich-body">
+              <div className="ag-step-title">STEP 3 OF 6</div>
+              <div className="ag-step-copy">Connect tools and APIs to extend your agent's capabilities.</div>
+              <div className="ag-tools-grid">
+                {TOOL_LIBRARY.map(tool=>(
+                  <button key={tool.name} className={`ag-tool-card ${localData.tools.includes(tool.name)?'on':''}`} onClick={()=>setLocalData(p=>({...p,tools:p.tools.includes(tool.name)?p.tools.filter(t=>t!==tool.name):[...p.tools,tool.name]}))}>
+                    <div className="ag-tool-top"><strong style={{fontSize:'.88rem'}}>{tool.name}</strong></div>
+                    <p>{tool.desc}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          );
+        case 3:
+          return (
+            <div className="ag-rich-body">
+              <div className="ag-step-title">STEP 4 OF 6</div>
+              <div className="ag-step-copy">Choose how your agent remembers context across conversations.</div>
+              {memoryOptions.map(m=>(
+                <button key={m} className={`ag-memory-card ${localData.memory===m?'on':''}`} onClick={()=>setLocalData(p=>({...p,memory:m}))}>
+                  {m}
+                  <div style={{fontSize:'.78rem',fontWeight:400,color:'var(--text3)',marginTop:3}}>
+                    {m==='Short-term Only'?'Remembers context within a single session only.':m==='Long-term Memory'?'Persists memory across sessions using a vector store.':'Each conversation starts fresh with no prior context.'}
+                  </div>
+                </button>
+              ))}
+            </div>
+          );
+        case 4:
+          return (
+            <div className="ag-rich-body">
+              <div className="ag-step-title">STEP 5 OF 6</div>
+              <div className="ag-step-copy">Test your agent with sample inputs before deploying.</div>
+              {['What can you help me with?','Give me a quick summary of your capabilities','How do you handle errors?'].map(s=>(
+                <div key={s} className="ag-test-row">
+                  <span style={{flex:1}}>{s}</span>
+                  <button className="ag-mini-btn" onClick={()=>nxToast('Test sent!')}>Run →</button>
+                </div>
+              ))}
+              <div className="ag-note-blue" style={{marginTop:12}}>All test messages are processed in sandbox mode and won't affect live metrics.</div>
+            </div>
+          );
+        case 5:
+          return (
+            <div className="ag-rich-body">
+              <div className="ag-step-title">STEP 6 OF 6</div>
+              <div className="ag-step-copy">Your agent is ready. Choose how to deploy it.</div>
+              <div className="ag-deploy-grid">
+                {[{title:'Web Widget',desc:'Embed a chat widget on any website.'},{title:'API Endpoint',desc:'Call your agent via REST API.'},{title:'Slack Bot',desc:'Deploy directly into your Slack workspace.'},{title:'WhatsApp',desc:'Connect to WhatsApp Business API.'}].map(d=>(
+                  <div key={d.title} className="ag-deploy-card">
+                    <strong>{d.title}</strong>
+                    <p>{d.desc}</p>
+                    <button className="ag-mini-btn" style={{marginTop:8}} onClick={()=>nxToast(`${d.title} deployment started!`)}>Deploy →</button>
+                  </div>
+                ))}
+              </div>
+              <div className="ag-deploy-finish" style={{marginTop:14}}>🎉 Configuration saved successfully!</div>
+            </div>
+          );
+        default: return null;
+      }
+    };
+
+    return (
+      <div className="ag-overlay" onClick={()=>setShowEditConfigModal(false)}>
+        <div className="ag-modal" style={{width:'min(700px,94vw)',maxHeight:'88vh',overflow:'hidden',display:'flex',flexDirection:'column'}} onClick={e=>e.stopPropagation()}>
+          <div className="ag-modal-head">
+            <div style={{display:'flex',alignItems:'center',gap:10}}>
+              <div style={{width:36,height:36,borderRadius:10,background:'var(--accent)',display:'flex',alignItems:'center',justifyContent:'center',color:'#fff',fontSize:'1.1rem'}}>✦</div>
+              <div>
+                <div style={{fontWeight:700,fontSize:'1.05rem'}}>Define your agent's purpose</div>
+                <div style={{fontSize:'.78rem',color:'var(--text3)'}}>Step {editConfigStep+1} of 6</div>
+              </div>
+            </div>
+            <button style={{border:'1px solid var(--border2)',background:'var(--bg)',borderRadius:'50%',width:30,height:30,cursor:'pointer',fontSize:'1rem'}} onClick={()=>setShowEditConfigModal(false)}>✕</button>
+          </div>
+          <div className="ag-step-tabs-rich" style={{display:'flex',gap:0,overflowX:'auto'}}>
+            {EDIT_CONFIG_STEPS.map((s,i)=>(
+              <button key={s} className={`${editConfigStep===i?'active':''} ${editConfigStep>i?'done':''}`} style={{whiteSpace:'nowrap',padding:'.5rem .7rem',fontSize:'.8rem'}} onClick={()=>setEditConfigStep(i)}>
+                <span className="ag-step-dot">{editConfigStep>i?'✓':i+1}</span>{s}
+              </button>
+            ))}
+          </div>
+          <div style={{flex:1,overflowY:'auto'}}>
+            {stepContent()}
+          </div>
+          <div className="ag-actions">
+            <button className="agent-pill-btn" onClick={()=>editConfigStep>0?setEditConfigStep(s=>s-1):setShowEditConfigModal(false)}>{editConfigStep===0?'Cancel':'← Back'}</button>
+            <div style={{display:'flex',alignItems:'center',gap:8}}>
+              <div style={{display:'flex',gap:5}}>
+                {EDIT_CONFIG_STEPS.map((_,i)=><div key={i} style={{width:8,height:8,borderRadius:'50%',background:i===editConfigStep?'var(--accent)':'var(--border2)'}} />)}
+              </div>
+              <button style={{background:'var(--accent)',color:'#fff',border:'none',borderRadius:999,padding:'.45rem 1.2rem',fontWeight:700,cursor:'pointer'}} onClick={()=>{if(editConfigStep<5)setEditConfigStep(s=>s+1);else{setShowEditConfigModal(false);nxToast('✅ Configuration saved!');}}}>{editConfigStep===5?'Save Configuration':'Next →'}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const AgentDashboard = () => (
+    <div className="agent-chat-full" style={{background:'var(--bg)'}}>
+      <div className="agent-chat-topbar">
+        <button className="agent-pill-btn" onClick={()=>setShowAgentDashboard(false)}>← Back to Agents</button>
+        <div className="agent-title-wrap">
+          <div className="agent-title-row">
+            <div className="agent-icon-chip">{activeAgent?.icon}</div>
+            <div className="agent-name">{activeAgent?.name} — Dashboard</div>
+          </div>
+        </div>
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:'1.5rem'}}>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))',gap:12,marginBottom:20}}>
+          {[{label:'Total Messages',value:'1,284',icon:'💬',color:'#3b82f6'},{label:'Avg Latency',value:'320ms',icon:'⚡',color:'#f59e0b'},{label:'Tokens Used',value:'48,200',icon:'🔢',color:'#8b5cf6'},{label:'Success Rate',value:'98.4%',icon:'✅',color:'#10b981'}].map(m=>(
+            <div key={m.label} style={{background:'var(--white)',border:'1px solid var(--border)',borderRadius:14,padding:'1rem',display:'flex',flexDirection:'column',gap:6}}>
+              <div style={{fontSize:'1.4rem'}}>{m.icon}</div>
+              <div style={{fontSize:'1.6rem',fontWeight:800,color:m.color}}>{m.value}</div>
+              <div style={{fontSize:'.78rem',color:'var(--text3)'}}>{m.label}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginBottom:20}}>
+          <div style={{background:'var(--white)',border:'1px solid var(--border)',borderRadius:14,padding:'1rem'}}>
+            <div style={{fontWeight:700,marginBottom:12,fontSize:'.9rem'}}>Messages Over Time</div>
+            <div style={{display:'flex',alignItems:'flex-end',gap:6,height:80}}>
+              {[40,65,50,80,70,90,75,95,60,85,100,88].map((h,i)=>(
+                <div key={i} style={{flex:1,background:'var(--accent)',borderRadius:4,height:`${h}%`,opacity:.7+i*.02}} />
+              ))}
+            </div>
+            <div style={{display:'flex',justifyContent:'space-between',fontSize:'.68rem',color:'var(--text3)',marginTop:6}}>
+              <span>Jan</span><span>Jun</span><span>Dec</span>
+            </div>
+          </div>
+          <div style={{background:'var(--white)',border:'1px solid var(--border)',borderRadius:14,padding:'1rem'}}>
+            <div style={{fontWeight:700,marginBottom:12,fontSize:'.9rem'}}>Top Queries</div>
+            {[{q:'Product information',pct:42},{q:'Order status',pct:28},{q:'Billing issues',pct:18},{q:'Technical support',pct:12}].map(r=>(
+              <div key={r.q} style={{marginBottom:8}}>
+                <div style={{display:'flex',justifyContent:'space-between',fontSize:'.78rem',marginBottom:3}}><span>{r.q}</span><span style={{color:'var(--text3)'}}>{r.pct}%</span></div>
+                <div style={{height:6,background:'var(--bg2)',borderRadius:999}}><div style={{height:'100%',width:`${r.pct}%`,background:'var(--accent)',borderRadius:999}} /></div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{background:'var(--white)',border:'1px solid var(--border)',borderRadius:14,padding:'1rem'}}>
+          <div style={{fontWeight:700,marginBottom:12,fontSize:'.9rem'}}>Recent Activity</div>
+          <table style={{width:'100%',borderCollapse:'collapse',fontSize:'.8rem'}}>
+            <thead><tr style={{borderBottom:'1px solid var(--border)',color:'var(--text3)'}}>
+              <th style={{textAlign:'left',padding:'.4rem .5rem'}}>Time</th>
+              <th style={{textAlign:'left',padding:'.4rem .5rem'}}>User</th>
+              <th style={{textAlign:'left',padding:'.4rem .5rem'}}>Query</th>
+              <th style={{textAlign:'left',padding:'.4rem .5rem'}}>Status</th>
+            </tr></thead>
+            <tbody>
+              {[{t:'10:04 AM',u:'user_291',q:'How do I reset my password?',s:'Resolved'},{t:'10:01 AM',u:'user_188',q:'My order hasn\'t arrived',s:'Escalated'},{t:'9:58 AM',u:'user_445',q:'Billing issue on my account',s:'Resolved'},{t:'9:52 AM',u:'user_302',q:'Report a bug',s:'Pending'}].map((r,i)=>(
+                <tr key={i} style={{borderBottom:'1px solid var(--border)'}}>
+                  <td style={{padding:'.45rem .5rem',color:'var(--text3)'}}>{r.t}</td>
+                  <td style={{padding:'.45rem .5rem'}}>{r.u}</td>
+                  <td style={{padding:'.45rem .5rem'}}>{r.q}</td>
+                  <td style={{padding:'.45rem .5rem'}}><span style={{fontSize:'.72rem',padding:'.15rem .5rem',borderRadius:999,background:r.s==='Resolved'?'#dcfce7':r.s==='Escalated'?'#fee2e2':'#fef9c3',color:r.s==='Resolved'?'#15803d':r.s==='Escalated'?'#b91c1c':'#a16207'}}>{r.s}</span></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+
   if (mode === 'agent-chat' && activeAgent) {
+    if (showAgentDashboard) return <AgentDashboard />;
+
     const tryChips =
       activeAgent.name === 'Customer Support Agent'
         ? ['My order hasn\'t arrived', 'I need a refund', 'How do I reset my password?', 'Billing issue on my account', 'Report a bug']
@@ -570,10 +831,11 @@ const AgentBuilder = ({ openChatFromAgent }) => {
             <div className="acr-metric"><span>Avg latency</span><strong>—</strong></div>
             <div className="acr-metric"><span>Tokens used</span><strong>{agentMetrics.tokens}</strong></div>
             <div className="acr-title">ACTIONS</div>
-            <button className="acr-btn">✎ Edit configuration</button>
-            <button className="acr-btn">🔗 Copy endpoint URL</button>
-            <button className="acr-btn">📊 View dashboard</button>
+            <button className="acr-btn" onClick={() => { setEditConfigStep(0); setShowEditConfigModal(true); }}>✎ Edit configuration</button>
+            <button className="acr-btn" onClick={handleCopyEndpointUrl}>{urlCopied ? '✅ Copied!' : '🔗 Copy endpoint URL'}</button>
+            <button className="acr-btn" onClick={() => setShowAgentDashboard(true)}>📊 View dashboard</button>
             <button className="acr-btn" onClick={() => setMode('workspace')}>← Back to Agents</button>
+            {showEditConfigModal && <EditConfigModal />}
           </aside>
         </div>
       </div>
