@@ -8,6 +8,7 @@ import { ModelsModule } from './models/models.module';
 import { ChatModule } from './chat/chat.module';
 import { TasksModule } from './tasks/tasks.module';
 import { AgentsModule } from './agents/agents.module';
+import { SubscribeModule } from './subscribe/subscribe.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { AgentsModule } from './agents/agents.module';
     ChatModule,
     TasksModule,
     AgentsModule,
+    SubscribeModule,
   ],
 })
 export class AppModule {}
