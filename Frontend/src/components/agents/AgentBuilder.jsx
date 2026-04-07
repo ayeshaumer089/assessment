@@ -323,22 +323,38 @@ const AgentBuilder = ({ openChatFromAgent }) => {
     nxToast(`🤖 ${nextAgent.name} activated!`);
   };
 
-  const sendAgentChat = (presetText) => {
+  const sendAgentChat = async (presetText) => {
     const text = (presetText ?? agentChatInput).trim();
     if (!text) return;
-    const reply = randomReply();
-    const userWords = text.split(/\s+/).filter(Boolean).length;
-    const aiWords = reply.split(/\s+/).filter(Boolean).length;
     setAgentChatMessages((prev) => [
       ...prev,
       { role: 'user', text, time: getTimeLabel() },
-      { role: 'ai', text: reply, time: getTimeLabel() },
     ]);
-    setAgentMetrics((prev) => ({
-      messages: prev.messages + 1,
-      tokens: prev.tokens + Math.floor(userWords * 1.3 + aiWords * 1.3),
-    }));
     setAgentChatInput('');
+    try {
+      const res = await getChatResponse('agent_replies', {
+        agentName: activeAgent?.name ?? '',
+        input: text,
+      });
+      const reply = res?.text || randomReply();
+      const userWords = text.split(/\s+/).filter(Boolean).length;
+      const aiWords = reply.split(/\s+/).filter(Boolean).length;
+      setAgentChatMessages((prev) => [
+        ...prev,
+        { role: 'ai', text: reply, time: getTimeLabel() },
+      ]);
+      setAgentMetrics((prev) => ({
+        messages: prev.messages + 1,
+        tokens: prev.tokens + Math.floor(userWords * 1.3 + aiWords * 1.3),
+      }));
+    } catch {
+      const reply = randomReply();
+      setAgentChatMessages((prev) => [
+        ...prev,
+        { role: 'ai', text: reply, time: getTimeLabel() },
+      ]);
+      setAgentMetrics((prev) => ({ ...prev, messages: prev.messages + 1 }));
+    }
   };
 
   const saveDraftAgent = async () => {

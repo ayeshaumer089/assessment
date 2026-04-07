@@ -63,6 +63,18 @@ export class ChatService {
       return { text: '' };
     }
 
+    // Handle agent_replies: nested object keyed by agent name
+    if (key === 'agent_replies' && typeof value === 'object' && !Array.isArray(value)) {
+      const agentName = String(payload.agentName ?? '');
+      const replies = value as Record<string, unknown>;
+      const agentReplies = (replies[agentName] ?? replies['default']) as string[] | undefined;
+      if (Array.isArray(agentReplies) && agentReplies.length > 0) {
+        const picked = agentReplies[Math.floor(Math.random() * agentReplies.length)];
+        return { text: this.renderTemplate(picked, payload) };
+      }
+      return { text: '' };
+    }
+
     if (typeof value === 'object') {
       const out: Record<string, unknown> = {};
       Object.entries(value as Record<string, unknown>).forEach(([k, v]) => {

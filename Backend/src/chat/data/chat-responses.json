@@ -16,6 +16,43 @@
     "Great question! Based on your request, here's what I recommend:\n\n- Start with the core functionality\n- Add error handling and edge cases\n- Include tests for validation\n\nWould you like me to begin with step 1?",
     "I understand what you need. Let me work on this right away.\n\nI'll process your request and provide a detailed output with all the relevant information organised clearly.",
     "Thanks for the context. I can help with: \"{{input}}\".\n\nI'll break this down into small actions and guide you through implementation and review."
-  ]
+  ],
+  "agent_replies": {
+    "Research Agent": [
+      "I've started researching that topic. Here's what I found:\n\n**Key Findings:**\n- Multiple credible sources confirm this trend\n- Recent data from the last 6 months shows significant growth\n- Three competing approaches exist in the literature\n\n**Summary:** The evidence points toward a clear direction. Want me to compile a full report with citations?",
+      "Great research question! Let me break this down:\n\n**Sources Identified:** 12 relevant papers and articles\n**Consensus:** Strong agreement across sources\n**Outliers:** 2 contrarian viewpoints worth noting\n\nShall I synthesise these into a structured report?",
+      "I've scanned the web and summarised the most relevant findings for: \"**{{input}}**\".\n\nTop insights:\n1. The field is evolving rapidly — new developments every week\n2. Key players include both established institutions and startups\n3. Practical applications are already emerging\n\nWant a deeper dive into any of these areas?"
+    ],
+    "Customer Support Agent": [
+      "Thanks for reaching out! I've looked into your issue and here's what I can do:\n\n**Status:** Issue identified ✅\n**Resolution:** I can process this for you right away\n**Timeline:** Typically resolved within 24 hours\n\nIs there anything else I can help you with today?",
+      "I completely understand your concern. Let me help you with that.\n\nI've checked your account and found the relevant details. Here's what I recommend:\n\n- **Step 1:** Verify your account information\n- **Step 2:** I'll escalate this to the right team\n- **Step 3:** You'll receive a confirmation email\n\nDoes that work for you?",
+      "Happy to help with: \"**{{input}}**\".\n\nOur support team handles this type of request regularly. I've flagged it as high priority and will ensure you get a resolution quickly.\n\nReference number: #SUP-{{input}}\n\nAnything else I can assist with?"
+    ],
+    "Code Review Agent": [
+      "I've reviewed the code and here's my analysis:\n\n**Issues Found:**\n- 2 potential null pointer exceptions\n- 1 performance bottleneck in the loop\n- Missing error handling on async calls\n\n**Suggestions:**\n- Add input validation at entry points\n- Consider memoisation for repeated computations\n- Add unit tests for edge cases\n\nWant me to generate the fixes?",
+      "Code review complete! Here's the summary:\n\n✅ **Passed:** Logic flow, naming conventions, structure\n⚠️ **Warnings:** 3 minor style issues\n❌ **Errors:** 1 critical bug — unhandled promise rejection\n\nI can auto-generate a patch for the critical issue. Shall I proceed?",
+      "Looking at: \"**{{input}}**\"\n\nHere's my assessment:\n\n**Security:** No obvious vulnerabilities detected\n**Performance:** Could be optimised — O(n²) can be reduced to O(n log n)\n**Readability:** Good overall, a few variable names could be clearer\n\nShall I provide the refactored version?"
+    ],
+    "Data Analysis Agent": [
+      "I've processed your data and here are the key insights:\n\n**Summary Statistics:**\n- Mean: 47.3 | Median: 44.1 | Std Dev: 12.8\n- Outliers detected: 3 data points\n- Trend: Upward over the last 30 days\n\n**Recommendation:** The data suggests a strong positive correlation. Want a full visualisation report?",
+      "Analysis complete for: \"**{{input}}**\"\n\n📊 **Findings:**\n- Dataset contains 1,240 records\n- 94.2% data completeness\n- 3 significant clusters identified\n\n**Next Steps:** I can generate charts, export to CSV, or build a dashboard. What would you prefer?",
+      "Here's what the numbers are telling us:\n\n1. **Growth trend** is consistent over the past quarter\n2. **Anomaly detected** on week 3 — likely an external factor\n3. **Forecast** suggests 12% increase next month\n\nShall I build a visual report or export the raw analysis?"
+    ],
+    "Content Writer Agent": [
+      "Here's a draft based on your request:\n\n**Headline:** Unlock the Power of AI for Your Business\n\n**Opening:** In today's fast-moving landscape, staying ahead means embracing the tools that give you an edge...\n\n**CTA:** Ready to transform your workflow? Let's get started.\n\nWant me to expand this into a full piece or adjust the tone?",
+      "Content created for: \"**{{input}}**\"\n\n✍️ **Draft ready** — 450 words, SEO-optimised\n📊 **Readability score:** 72/100 (Good)\n🔑 **Keywords included:** 5 primary, 8 secondary\n\nShall I refine the tone, add a call-to-action, or generate social media variants?",
+      "Great brief! Here's what I've prepared:\n\n- **Blog post:** 600-word draft ready\n- **Social captions:** 3 variants (LinkedIn, Twitter, Instagram)\n- **Email subject lines:** 5 A/B test options\n\nWhich format would you like to review first?"
+    ],
+    "Sales Outreach Agent": [
+      "Outreach sequence created for: \"**{{input}}**\"\n\n📧 **Email 1 (Day 1):** Introduction & value proposition\n📧 **Email 2 (Day 3):** Case study & social proof\n📧 **Email 3 (Day 7):** Follow-up with CTA\n\nOpen rate estimate: 28–34% based on similar campaigns. Want to customise the messaging?",
+      "I've scored and prioritised your leads:\n\n🔥 **Hot (Score 80+):** 12 leads — ready for direct outreach\n🟡 **Warm (Score 50–79):** 34 leads — nurture sequence recommended\n❄️ **Cold (Score <50):** 18 leads — long-term drip campaign\n\nShall I draft personalised messages for the hot leads?",
+      "Sales strategy for: \"**{{input}}**\"\n\n**Recommended approach:**\n1. Lead with a personalised pain point\n2. Reference a relevant case study\n3. Offer a low-commitment next step (demo, call, free trial)\n\nI can generate the full outreach copy now. Ready to proceed?"
+    ],
+    "default": [
+      "Absolutely! I can handle that task for you. Here's my approach:\n\n**Phase 1:** Analysis & Planning\n- Review current state\n- Identify gaps\n- Define success criteria\n\n**Phase 2:** Execution\n- Implement changes\n- Validate results\n- Document process\n\nReady to start?",
+      "Great question! Based on your request, here's what I recommend:\n\n- Start with the core functionality\n- Add error handling and edge cases\n- Include tests for validation\n\nWould you like me to begin with step 1?",
+      "I understand what you need. Let me work on this right away.\n\nI'll process your request and provide a detailed output with all the relevant information organised clearly."
+    ]
+  }
 }
 
