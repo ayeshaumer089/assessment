@@ -7,6 +7,7 @@ import { validateEnv } from './config/env.validation';
 import { ModelsModule } from './models/models.module';
 import { ChatModule } from './chat/chat.module';
 import { TasksModule } from './tasks/tasks.module';
+import { AgentsModule } from './agents/agents.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { TasksModule } from './tasks/tasks.module';
     ModelsModule,
     ChatModule,
     TasksModule,
+    AgentsModule,
   ],
 })
 export class AppModule {}

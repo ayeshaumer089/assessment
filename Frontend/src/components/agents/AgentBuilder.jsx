@@ -11,6 +11,11 @@ import {
   updateTask as updateTaskApi,
 } from '../../services/tasks';
 import {
+  createAgent as createAgentApi,
+  fetchAgentTemplates as fetchAgentTemplatesApi,
+  updateAgent as updateAgentApi,
+} from '../../services/agents';
+import {
   ACP_SUGGESTED,
   AGENT_TABS,
   DEFAULT_AGENTS,
@@ -123,6 +128,8 @@ const AgentBuilder = ({ openChatFromAgent }) => {
     scenarios: [],
     manualScenario: '',
   });
+  const [builderAgentId, setBuilderAgentId] = useState(null);
+  const [savedTemplates, setSavedTemplates] = useState([]);
   const [draftAgent, setDraftAgent] = useState({ name: '', purpose: '', model: 'GPT-5', tools: [], memory: 'short' });
   const [isRecording, setIsRecording] = useState(false);
   const [voiceTarget, setVoiceTarget] = useState('workspace');
@@ -201,6 +208,11 @@ const AgentBuilder = ({ openChatFromAgent }) => {
     if (!q) return tasks;
     return tasks.filter((t) => t.name.toLowerCase().includes(q));
   }, [taskInput, tasks]);
+  const allTemplateCards = useMemo(() => {
+    const names = new Set(TEMPLATE_CARDS.map((t) => t.name));
+    const dynamic = savedTemplates.filter((t) => !names.has(t.name));
+    return [...TEMPLATE_CARDS, ...dynamic];
+  }, [savedTemplates]);
 
   const activeConversation = activeTaskId ? convMap[activeTaskId] || [] : [];
 
@@ -249,6 +261,61 @@ const AgentBuilder = ({ openChatFromAgent }) => {
       });
     return () => abortController.abort();
   }, []);
+
+  const toTemplateCard = (agent) => ({
+    id: agent._id || agent.id,
+    name: agent.name || 'Custom Agent',
+    icon: agent.icon || '🤖',
+    model: agent.model || 'GPT-5',
+    tools: Array.isArray(agent.tools) ? agent.tools : [],
+    desc: agent.desc || agent.purpose || 'Custom agent created from scratch.',
+  });
+
+  const fetchSavedTemplates = async () => {
+    try {
+      const list = await fetchAgentTemplatesApi();
+      if (Array.isArray(list)) {
+        setSavedTemplates(list.map(toTemplateCard));
+      }
+    } catch {
+      // Keep static templates if API is unavailable.
+    }
+  };
+
+  useEffect(() => {
+    fetchSavedTemplates();
+  }, []);
+
+  const buildAgentPayload = (step = createStep, completed = false) => ({
+    name: (createData.name || '').trim() || 'My Custom Agent',
+    type: createData.type,
+    purpose: createData.purpose,
+    audience: createData.audience,
+    tone: createData.tone,
+    avoid: createData.avoid,
+    success: createData.success,
+    systemPrompt: createData.systemPrompt || buildSystemPromptFromAnswers(),
+    tools: createData.tools || [],
+    memory: createData.memory,
+    scenarios: createData.scenarios || [],
+    manualScenario: createData.manualScenario || '',
+    currentStep: step,
+    completed,
+    icon: '🤖',
+    model: draftAgent.model || 'GPT-5',
+    desc: createData.purpose || 'Custom agent created from scratch.',
+  });
+
+  const persistBuilderStep = async (step = createStep, completed = false) => {
+    const payload = buildAgentPayload(step, completed);
+    if (!builderAgentId) {
+      const created = await createAgentApi(payload);
+      const id = created?._id || created?.id;
+      if (id) setBuilderAgentId(id);
+      return created;
+    }
+    return updateAgentApi(builderAgentId, payload);
+  };
 
   const addTask = async () => {
     const name = (taskInput || `New Task #${tasks.length + 1}`).trim();
@@ -433,9 +500,16 @@ const AgentBuilder = ({ openChatFromAgent }) => {
       memory: createData.memory || 'Short-term Only',
       desc: createData.purpose || 'Custom agent created from scratch.',
     };
-    if (!myAgents.find((a) => a.name === agent.name)) {
-      setMyAgents((prev) => [...prev, agent]);
+    try {
+      await persistBuilderStep(5, true);
+      await fetchSavedTemplates();
+    } catch {
+      nxToast('Unable to save full agent configuration to database.');
+      return;
     }
+
+    if (!myAgents.find((a) => a.name === agent.name)) setMyAgents((prev) => [...prev, agent]);
+    setBuilderAgentId(null);
     setShowCreateModal(false);
     setShowInlineLibrary(false);
     setMode('workspace');
@@ -453,9 +527,17 @@ const AgentBuilder = ({ openChatFromAgent }) => {
     }
   };
 
-  const openCustomAgentFlow = () => {
+  const openCustomAgentFlow = async () => {
     setCreateStep(0);
+    setBuilderAgentId(null);
     setShowCreateModal(true);
+    try {
+      const created = await createAgentApi(buildAgentPayload(0, false));
+      const id = created?._id || created?.id;
+      if (id) setBuilderAgentId(id);
+    } catch {
+      nxToast('Could not start builder draft in database.');
+    }
   };
 
   const buildSystemPromptFromAnswers = () => {
@@ -1077,9 +1159,9 @@ const AgentBuilder = ({ openChatFromAgent }) => {
             </div>
 
             <div className="agents-templates">
-              <h4>Agent Templates <span style={{ background: 'var(--bg2)', padding: '0 6px', borderRadius: 4 }}>{TEMPLATE_CARDS.length}</span></h4>
+              <h4>Agent Templates <span style={{ background: 'var(--bg2)', padding: '0 6px', borderRadius: 4 }}>{allTemplateCards.length}</span></h4>
               <div className="template-grid">
-                {TEMPLATE_CARDS.map((agent) => (
+                {allTemplateCards.map((agent) => (
                   <div key={agent.name} className="template-card" onClick={() => launchAgent(agent)}>
                     <h5>{agent.icon} {agent.name}</h5>
                     <p>{agent.desc?.slice(0, 70) || 'Ready-to-use template.'}</p>
@@ -1300,9 +1382,9 @@ const AgentBuilder = ({ openChatFromAgent }) => {
               </>
             )}
             <div className="agents-templates">
-              <h4>Agent Templates <span style={{ background: 'var(--bg2)', padding: '0 6px', borderRadius: 4 }}>{TEMPLATE_CARDS.length + 1}</span></h4>
+              <h4>Agent Templates <span style={{ background: 'var(--bg2)', padding: '0 6px', borderRadius: 4 }}>{allTemplateCards.length + 1}</span></h4>
               <div className="template-grid">
-                {TEMPLATE_CARDS.map((card) => (
+                {allTemplateCards.map((card) => (
                   <div key={card.name} className="template-card" onClick={() => setShowTemplateModal(card)}>
                     <h5>{card.icon} {card.name}</h5>
                     <p>Ready-to-use template with tools and model presets.</p>
@@ -1349,7 +1431,19 @@ const AgentBuilder = ({ openChatFromAgent }) => {
             </div>
             <div className="ag-step-tabs ag-step-tabs-rich">
                {['Purpose', 'System Prompt', 'Tools & APIs', 'Memory', 'Test', 'Deploy'].map((s, i) => (
-                <button key={s} className={`${i === createStep ? 'active' : ''} ${i < createStep ? 'done' : ''}`} onClick={() => setCreateStep(i)}>
+                <button
+                  key={s}
+                  className={`${i === createStep ? 'active' : ''} ${i < createStep ? 'done' : ''}`}
+                  onClick={async () => {
+                    if (i === createStep) return;
+                    try {
+                      await persistBuilderStep(createStep, false);
+                    } catch {
+                      nxToast('Draft save failed, moving to selected step.');
+                    }
+                    setCreateStep(i);
+                  }}
+                >
                   <span className="ag-step-dot">{i < createStep ? '✓' : i + 1}</span>{s}
                 </button>
               ))}
@@ -1445,9 +1539,37 @@ const AgentBuilder = ({ openChatFromAgent }) => {
               )}
             </div>
             <div className="ag-actions">
-              <button className="btn btn-ghost" onClick={() => setCreateStep((s) => Math.max(0, s - 1))}>← Back</button>
+              <button
+                className="btn btn-ghost"
+                onClick={async () => {
+                  try {
+                    await persistBuilderStep(createStep, false);
+                  } catch {
+                    nxToast('Draft save failed, continuing navigation.');
+                  }
+                  if (createStep === 0) {
+                    setShowCreateModal(false);
+                  } else {
+                    setCreateStep((s) => Math.max(0, s - 1));
+                  }
+                }}
+              >
+                ← Back
+              </button>
               {createStep < 5 ? (
-                <button className="btn btn-primary" onClick={() => setCreateStep((s) => Math.min(5, s + 1))}>Next →</button>
+                <button
+                  className="btn btn-primary"
+                  onClick={async () => {
+                    try {
+                      await persistBuilderStep(createStep, false);
+                    } catch {
+                      nxToast('Draft save failed, continuing navigation.');
+                    }
+                    setCreateStep((s) => Math.min(5, s + 1));
+                  }}
+                >
+                  Next →
+                </button>
               ) : (
                 <button className="btn btn-primary" onClick={saveDraftAgent}>✓ Finish</button>
               )}
