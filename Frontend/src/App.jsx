@@ -3,6 +3,8 @@ import LandingPage from './pages/LandingPage';
 import AppPage from './pages/AppPage';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import OnboardingOverlay from './components/ui/OnboardingOverlay';
 import { clearAuthToken, getOnboardingDone, isAuthenticated, setOnboardingDone } from './services/session';
 import { useLanguage } from './context/LanguageContext';
@@ -19,6 +21,7 @@ function App() {
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isObDone, setIsObDone] = useState(false);
   const [onboardingAnswers, setOnboardingAnswers] = useState({});
+  const [resetToken, setResetToken] = useState('');
   const authenticated = isAuthenticated();
 
   useEffect(() => {
@@ -34,6 +37,16 @@ function App() {
     const rtlLanguages = new Set(['AR', 'UR']);
     document.documentElement.dir = rtlLanguages.has(language) ? 'rtl' : 'ltr';
   }, [language]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const page = params.get('page');
+    const token = params.get('token') || '';
+    if (page === 'reset-password') {
+      setResetToken(token);
+      setActivePage('reset-password');
+    }
+  }, []);
 
   const resolveTab = (tab) => (VALID_TABS.has(tab) ? tab : 'chat');
 
@@ -68,6 +81,10 @@ function App() {
     setActivePage('signup');
   };
 
+  const goForgotPassword = () => {
+    setActivePage('forgot-password');
+  };
+
   const logout = () => {
     clearAuthToken();
     setActivePage('landing');
@@ -85,9 +102,13 @@ function App() {
       {activePage === 'landing' ? (
         <LandingPage openApp={openApp} goSignIn={goSignIn} goAgentWithAuth={goAgentWithAuth} />
       ) : activePage === 'signin' ? (
-        <SignInPage goHome={goHome} goSignUp={goSignUp} openApp={openApp} postAuthTab={pendingPostAuthTab} />
+        <SignInPage goHome={goHome} goSignUp={goSignUp} goForgotPassword={goForgotPassword} openApp={openApp} postAuthTab={pendingPostAuthTab} />
       ) : activePage === 'signup' ? (
         <SignUpPage goHome={goHome} goSignIn={goSignIn} openApp={openApp} postAuthTab={pendingPostAuthTab} />
+      ) : activePage === 'forgot-password' ? (
+        <ForgotPasswordPage goHome={goHome} goSignIn={goSignIn} goSignUp={goSignUp} />
+      ) : activePage === 'reset-password' ? (
+        <ResetPasswordPage goHome={goHome} goSignIn={goSignIn} goSignUp={goSignUp} token={resetToken} />
       ) : (
         <AppPage 
           activeTab={activeTab} 

@@ -36,3 +36,11 @@ export function getGoogleAuthConfig() {
     method: 'GET',
   });
 }
+
+export function forgotPassword(payload) {
+  return request('/auth/forgot-password', payload);
+}
+
+export function resetPassword(payload) {
+  return request('/auth/reset-password', payload);
+}

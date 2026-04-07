@@ -25,4 +25,18 @@ export class UsersService {
     });
     return user.save();
   }
+
+  async findById(userId: string, withPassword = false) {
+    const query = this.userModel.findById(userId);
+    if (withPassword) {
+      query.select('+password');
+    }
+    return query.exec();
+  }
+
+  async updatePassword(userId: string, password: string) {
+    return this.userModel
+      .findByIdAndUpdate(userId, { password }, { new: true })
+      .exec();
+  }
 }

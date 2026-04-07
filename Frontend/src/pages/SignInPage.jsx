@@ -2,10 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { getGoogleAuthConfig, googleAuth, login } from '../services/auth';
 import { initGoogleSignIn, loadGoogleIdentityScript, renderGoogleButton } from '../services/googleIdentity';
 import { setAuthToken } from '../services/session';
-import { nxToast } from '../utils/helpers';
 import AuthShell from '../components/auth/AuthShell';
 
-const SignInPage = ({ goHome, goSignUp, openApp, postAuthTab = 'chat' }) => {
+const SignInPage = ({ goHome, goSignUp, goForgotPassword, openApp, postAuthTab = 'chat' }) => {
   const safePostAuthTab = ['chat', 'marketplace', 'agents', 'research'].includes(postAuthTab) ? postAuthTab : 'chat';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -97,7 +96,7 @@ const SignInPage = ({ goHome, goSignUp, openApp, postAuthTab = 'chat' }) => {
             <label className="nlr-label" htmlFor="password">Password</label>
             <input className="nlr-input" id="password" type="password" placeholder="Enter your password" minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
-          <button type="button" className="nlr-forgot" onClick={() => nxToast('Password reset flow coming soon')}>Forgot password?</button>
+          <button type="button" className="nlr-forgot" onClick={goForgotPassword}>Forgot password?</button>
           {error ? <div className="auth-error" style={{ marginBottom: '0.75rem' }}>{error}</div> : null}
           <button type="submit" className="nlr-submit" disabled={isLoading}>{isLoading ? 'Signing in...' : 'Sign in'}</button>
           <div className="nlr-divider">Or continue with</div>
