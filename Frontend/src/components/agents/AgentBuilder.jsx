@@ -126,13 +126,58 @@ const AgentBuilder = ({ openChatFromAgent }) => {
   const [draftAgent, setDraftAgent] = useState({ name: '', purpose: '', model: 'GPT-5', tools: [], memory: 'short' });
   const [isRecording, setIsRecording] = useState(false);
   const [voiceTarget, setVoiceTarget] = useState('workspace');
+  // Workspace attachments (existing behavior in workspace search area)
   const [attachedFiles, setAttachedFiles] = useState([]);
+  // Task conversation attachments (preview shown in task composer)
+  const [taskAttachedFiles, setTaskAttachedFiles] = useState([]);
+  // Agent chat attachments (preview shown in agent-chat composer)
+  const [agentChatAttachedFiles, setAgentChatAttachedFiles] = useState([]);
   const recognitionRef = useRef(null);
   const voiceTargetRef = useRef('workspace');
   const workspaceFileInputRef = useRef(null);
   const workspaceImageInputRef = useRef(null);
   const convFileInputRef = useRef(null);
   const convImageInputRef = useRef(null);
+  const revokePreviewUrls = (items = []) => {
+    items.forEach((it) => {
+      if (it?.previewUrl) URL.revokeObjectURL(it.previewUrl);
+    });
+  };
+
+  useEffect(() => {
+    return () => {
+      revokePreviewUrls(taskAttachedFiles);
+      revokePreviewUrls(agentChatAttachedFiles);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const addPreviewFiles = (files, setTarget) => {
+    const mapped = files.map((file) => {
+      const isImage = file.type?.startsWith('image/');
+      return {
+        id: `${file.name}-${file.size}-${file.lastModified}-${Math.random().toString(16).slice(2)}`,
+        file,
+        kind: isImage ? 'image' : 'file',
+        previewUrl: isImage ? URL.createObjectURL(file) : '',
+      };
+    });
+    setTarget((prev) => [...prev, ...mapped]);
+  };
+
+  const removePreviewFile = (id, setTarget) => {
+    setTarget((prev) => {
+      const item = prev.find((p) => p.id === id);
+      if (item?.previewUrl) URL.revokeObjectURL(item.previewUrl);
+      return prev.filter((p) => p.id !== id);
+    });
+  };
+
+  const clearPreviewFiles = (items, setTarget) => {
+    revokePreviewUrls(items);
+    setTarget([]);
+  };
+
   const [openTaskMenuId, setOpenTaskMenuId] = useState(null);
   const [showEditConfigModal, setShowEditConfigModal] = useState(false);
   const [editConfigStep, setEditConfigStep] = useState(0);
@@ -223,8 +268,15 @@ const AgentBuilder = ({ openChatFromAgent }) => {
 
   const sendTaskMessage = async (forcedText) => {
     if (!activeTaskId) return;
-    const text = (forcedText ?? convInput).trim();
-    if (!text) return;
+    const baseText = (forcedText ?? convInput).trim();
+    if (!baseText && taskAttachedFiles.length === 0) return;
+
+    let text = baseText;
+    if (taskAttachedFiles.length > 0) {
+      const fileNames = taskAttachedFiles.map((a) => `"${a.file.name}"`).join(', ');
+      text = text ? `${text}\n\n[Attached: ${fileNames}]` : `[Attached: ${fileNames}]`;
+    }
+
     setConvMap((prev) => ({
       ...prev,
       [activeTaskId]: [
@@ -233,6 +285,7 @@ const AgentBuilder = ({ openChatFromAgent }) => {
       ],
     }));
     setConvInput('');
+    if (taskAttachedFiles.length > 0) clearPreviewFiles(taskAttachedFiles, setTaskAttachedFiles);
     try {
       const res = await getChatResponse('task_replies', { input: text });
       const aiText = res?.text || randomReply();
@@ -328,13 +381,21 @@ const AgentBuilder = ({ openChatFromAgent }) => {
   };
 
   const sendAgentChat = async (presetText) => {
-    const text = (presetText ?? agentChatInput).trim();
-    if (!text) return;
+    const baseText = (presetText ?? agentChatInput).trim();
+    if (!baseText && agentChatAttachedFiles.length === 0) return;
+
+    let text = baseText;
+    if (agentChatAttachedFiles.length > 0) {
+      const fileNames = agentChatAttachedFiles.map((a) => `"${a.file.name}"`).join(', ');
+      text = text ? `${text}\n\n[Attached: ${fileNames}]` : `[Attached: ${fileNames}]`;
+    }
+
     setAgentChatMessages((prev) => [
       ...prev,
       { role: 'user', text, time: getTimeLabel() },
     ]);
     setAgentChatInput('');
+    if (agentChatAttachedFiles.length > 0) clearPreviewFiles(agentChatAttachedFiles, setAgentChatAttachedFiles);
     try {
       const res = await getChatResponse('agent_replies', {
         agentName: activeAgent?.name ?? '',
@@ -443,30 +504,39 @@ const AgentBuilder = ({ openChatFromAgent }) => {
   const handleAttachFile = (e, target = 'workspace') => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
-    setAttachedFiles((prev) => [...prev, ...files]);
+    if (target === 'agent-chat') addPreviewFiles(files, setAgentChatAttachedFiles);
+    else if (target === 'task' || target === 'conversation') addPreviewFiles(files, setTaskAttachedFiles);
+    else setAttachedFiles((prev) => [...prev, ...files]);
     const prompt = `Help me with this file: "${files[0].name}"`;
     if (target === 'agent-chat') setAgentChatInput(prompt);
     else if (target === 'task' || target === 'conversation') setConvInput(prompt);
     else setQuery(prompt);
     nxToast(`${files.length} file(s) attached`);
+    // allow attaching the same file again
+    e.target.value = '';
   };
 
   const handleAttachImage = (e, target = 'workspace') => {
     const files = Array.from(e.target.files || []);
     if (!files.length) return;
-    setAttachedFiles((prev) => [...prev, ...files]);
+    if (target === 'agent-chat') addPreviewFiles(files, setAgentChatAttachedFiles);
+    else if (target === 'task' || target === 'conversation') addPreviewFiles(files, setTaskAttachedFiles);
+    else setAttachedFiles((prev) => [...prev, ...files]);
     const prompt = `Analyze this image: "${files[0].name}"`;
     if (target === 'agent-chat') setAgentChatInput(prompt);
     else if (target === 'task' || target === 'conversation') setConvInput(prompt);
     else setQuery(prompt);
     nxToast(`${files.length} image(s) attached`);
+    e.target.value = '';
   };
 
   const handleVideoInput = async (target = 'workspace') => {
     try {
       const { blob } = await recordUserVideo({ durationMs: 4000 });
       const file = new File([blob], `video-${Date.now()}.webm`, { type: 'video/webm' });
-      setAttachedFiles((prev) => [...prev, file]);
+      if (target === 'agent-chat') addPreviewFiles([file], setAgentChatAttachedFiles);
+      else if (target === 'task' || target === 'conversation') addPreviewFiles([file], setTaskAttachedFiles);
+      else setAttachedFiles((prev) => [...prev, file]);
       const prompt = 'Analyze this short video for me.';
       if (target === 'agent-chat') setAgentChatInput(prompt);
       else if (target === 'task' || target === 'conversation') setConvInput(prompt);
@@ -481,7 +551,9 @@ const AgentBuilder = ({ openChatFromAgent }) => {
     try {
       const { blob } = await recordScreen({ durationMs: 4000 });
       const file = new File([blob], `screen-${Date.now()}.webm`, { type: 'video/webm' });
-      setAttachedFiles((prev) => [...prev, file]);
+      if (target === 'agent-chat') addPreviewFiles([file], setAgentChatAttachedFiles);
+      else if (target === 'task' || target === 'conversation') addPreviewFiles([file], setTaskAttachedFiles);
+      else setAttachedFiles((prev) => [...prev, file]);
       const prompt = 'Here is a screen recording. Help with this.';
       if (target === 'agent-chat') setAgentChatInput(prompt);
       else if (target === 'task' || target === 'conversation') setConvInput(prompt);
@@ -796,6 +868,30 @@ const AgentBuilder = ({ openChatFromAgent }) => {
             </div>
             <div className="conv-composer-wrap">
               <div className="conv-composer-card">
+                {agentChatAttachedFiles.length > 0 && (
+                  <div className="conv-attach-preview">
+                    {agentChatAttachedFiles.map((a) => (
+                      <div key={a.id} className={`conv-attach-item ${a.kind}`}>
+                        {a.kind === 'image' ? (
+                          <img className="conv-attach-thumb" src={a.previewUrl} alt={a.file.name} />
+                        ) : (
+                          <div className="conv-attach-file">
+                            <span className="conv-attach-ic">📎</span>
+                            <span className="conv-attach-name" title={a.file.name}>{a.file.name}</span>
+                          </div>
+                        )}
+                        <button
+                          type="button"
+                          className="conv-attach-x"
+                          onClick={() => removePreviewFile(a.id, setAgentChatAttachedFiles)}
+                          aria-label="Remove attachment"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <textarea
                   placeholder="Describe your project, ask a question, or just say hi — I`m here to help..."
                   value={agentChatInput}
@@ -1047,6 +1143,30 @@ const AgentBuilder = ({ openChatFromAgent }) => {
               </div>
             <div className="conv-composer-wrap">
               <div className="conv-composer-card">
+                {taskAttachedFiles.length > 0 && (
+                  <div className="conv-attach-preview">
+                    {taskAttachedFiles.map((a) => (
+                      <div key={a.id} className={`conv-attach-item ${a.kind}`}>
+                        {a.kind === 'image' ? (
+                          <img className="conv-attach-thumb" src={a.previewUrl} alt={a.file.name} />
+                        ) : (
+                          <div className="conv-attach-file">
+                            <span className="conv-attach-ic">📎</span>
+                            <span className="conv-attach-name" title={a.file.name}>{a.file.name}</span>
+                          </div>
+                        )}
+                        <button
+                          type="button"
+                          className="conv-attach-x"
+                          onClick={() => removePreviewFile(a.id, setTaskAttachedFiles)}
+                          aria-label="Remove attachment"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 <textarea
                   placeholder="Type your message..."
                   value={convInput}
@@ -1077,8 +1197,8 @@ const AgentBuilder = ({ openChatFromAgent }) => {
                     ✦
                   </button>
                   <span className="conv-composer-agent">Agent</span>
-                  <input ref={convFileInputRef} type="file" style={{ display: 'none' }} accept=".pdf,.doc,.docx,.txt,.csv" onChange={(e) => handleAttachFile(e, 'conversation')} />
-                  <input ref={convImageInputRef} type="file" style={{ display: 'none' }} accept="image/*" onChange={(e) => handleAttachImage(e, 'conversation')} />
+                  <input ref={convFileInputRef} type="file" style={{ display: 'none' }} accept=".pdf,.doc,.docx,.txt,.csv" onChange={(e) => handleAttachFile(e, 'task')} />
+                  <input ref={convImageInputRef} type="file" style={{ display: 'none' }} accept="image/*" onChange={(e) => handleAttachImage(e, 'task')} />
                 </div>
               </div>
               <button className="conv-send-round" onClick={() => sendTaskMessage()}>➤</button>
