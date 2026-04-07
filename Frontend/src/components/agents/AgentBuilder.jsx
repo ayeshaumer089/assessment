@@ -909,8 +909,8 @@ const AgentBuilder = ({ openChatFromAgent }) => {
                   <button className="agents-tool-btn green" title="Upload image" onClick={() => convImageInputRef.current?.click()}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg></button>
                   <button className="agents-tip-btn" title="Prompt tips" onClick={() => setAgentChatInput((prev) => (prev ? `${prev}\nHelp me break this into clear next steps.` : 'Help me break this into clear next steps.'))}>✦</button>
                   <span className="conv-composer-agent">Agent</span>
-                  <input ref={convFileInputRef} type="file" style={{ display: 'none' }} accept=".pdf,.doc,.docx,.txt,.csv" onChange={(e) => handleAttachFile(e, 'agent-chat')} />
-                  <input ref={convImageInputRef} type="file" style={{ display: 'none' }} accept="image/*" onChange={(e) => handleAttachImage(e, 'agent-chat')} />
+                  <input ref={convFileInputRef} type="file" multiple style={{ display: 'none' }} accept=".pdf,.doc,.docx,.txt,.csv" onChange={(e) => handleAttachFile(e, 'agent-chat')} />
+                  <input ref={convImageInputRef} type="file" multiple style={{ display: 'none' }} accept="image/*" onChange={(e) => handleAttachImage(e, 'agent-chat')} />
                 </div>
               </div>
               <button className="conv-send-round" onClick={() => sendAgentChat()}>➤</button>
