@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
 import Modal from './Modal';
 
-const ModelDetailModal = ({ isOpen, onClose, model }) => {
+const ModelDetailModal = ({ isOpen, onClose, model, initialTab }) => {
   const [activeTab, setActiveTab] = useState('overview');
+
+  // When modal opens or initialTab changes, switch to the requested tab
+  React.useEffect(() => {
+    if (isOpen) {
+      setActiveTab(initialTab || 'overview');
+    }
+  }, [isOpen, initialTab]);
 
   if (!model) return null;
 
@@ -153,7 +160,7 @@ const ModelDetailModal = ({ isOpen, onClose, model }) => {
                   <code style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: 'var(--blue)', whiteSpace: 'pre-wrap', display: 'block', lineHeight: 1.7 }}>
                     {`import nexusai\nclient = nexusai.Client(api_key="YOUR_KEY")\nresponse = client.chat(\n    model="${model.id}",\n    messages=[{"role":"user","content":"Hello!"}]\n)\nprint(response.content)`}
                   </code>
-                  <button className="copy-btn" onClick={(e) => handleCopy(`import nexusai\nclient = nexusai.Client(api_key="YOUR_KEY")\n...`, e)}>Copy</button>
+                  <button className="copy-btn" onClick={(e) => handleCopy(`import nexusai\nclient = nexusai.Client(api_key="YOUR_KEY")\nresponse = client.chat(\n    model="${model.id}",\n    messages=[{"role":"user","content":"Hello!"}]\n)\nprint(response.content)`, e)}>Copy</button>
                 </div>
               </div>
             </div>
@@ -162,6 +169,23 @@ const ModelDetailModal = ({ isOpen, onClose, model }) => {
               <div className="agent-step-content">
                 <h5>Understand input and output formats</h5>
                 <p>This model accepts <strong>text, images, and PDFs</strong> as input. Outputs are <strong>text and structured JSON</strong>. The context window is 128K tokens — roughly 96,000 words. For long documents, consider chunking content into sections.</p>
+              </div>
+            </div>
+            <div className="agent-step">
+              <div className="agent-step-num">4</div>
+              <div className="agent-step-content">
+                <h5>Set parameters for your use case</h5>
+                <p>Key parameters: <strong>temperature</strong> (0 = deterministic, 1 = creative), <strong>max_tokens</strong> (controls output length), <strong>system</strong> (sets model persona and behaviour). Start with temperature 0.3–0.7 for most applications.</p>
+              </div>
+            </div>
+            <div className="agent-step">
+              <div className="agent-step-num">5</div>
+              <div className="agent-step-content">
+                <h5>Test in the Playground first</h5>
+                <p>Before writing code, iterate on your prompt in the built-in Playground. Test edge cases, adjust tone and format, then copy the final prompt into your integration.</p>
+                <div style={{ marginTop: '0.75rem' }}>
+                  <button className="btn btn-primary" style={{ fontSize: '0.83rem', padding: '0.5rem 1.25rem' }} onClick={onClose}>Open Playground →</button>
+                </div>
               </div>
             </div>
             <div style={{ background: 'var(--teal-lt)', border: '1px solid rgba(10,94,73,0.2)', borderRadius: 'var(--radius)', padding: '1rem', marginTop: '0.5rem' }}>
@@ -234,12 +258,22 @@ const ModelDetailModal = ({ isOpen, onClose, model }) => {
               <div className="prompt-box">
                 <div className="prompt-box-label">Principle 1 — Be explicit about format</div>
                 <code>{`Summarize the following text in exactly 3 bullet points.\nEach bullet should be one sentence, under 20 words.\nText: {your_text_here}`}</code>
-                <button className="copy-btn" onClick={(e) => handleCopy(`Summarize the following text...`, e)}>Copy</button>
+                <button className="copy-btn" onClick={(e) => handleCopy(`Summarize the following text in exactly 3 bullet points.\nEach bullet should be one sentence, under 20 words.\nText: {your_text_here}`, e)}>Copy</button>
               </div>
               <div className="prompt-box">
                 <div className="prompt-box-label">Principle 2 — Assign a role</div>
                 <code>{`You are a senior software engineer specializing in Python.\nReview the following code for bugs, performance issues,\nand style violations. Be concise and actionable.\n\nCode: {your_code_here}`}</code>
-                <button className="copy-btn" onClick={(e) => handleCopy(`You are a senior software engineer...`, e)}>Copy</button>
+                <button className="copy-btn" onClick={(e) => handleCopy(`You are a senior software engineer specializing in Python.\nReview the following code for bugs, performance issues,\nand style violations. Be concise and actionable.\n\nCode: {your_code_here}`, e)}>Copy</button>
+              </div>
+              <div className="prompt-box">
+                <div className="prompt-box-label">Principle 3 — Chain-of-thought for complex tasks</div>
+                <code>{`Solve this step by step, showing your reasoning at each stage.\nProblem: {your_problem_here}\n\nThink through: assumptions → approach → calculation → answer`}</code>
+                <button className="copy-btn" onClick={(e) => handleCopy(`Solve this step by step, showing your reasoning at each stage.\nProblem: {your_problem_here}\n\nThink through: assumptions → approach → calculation → answer`, e)}>Copy</button>
+              </div>
+              <div className="prompt-box">
+                <div className="prompt-box-label">Principle 4 — Few-shot examples</div>
+                <code>{`Classify customer sentiment. Examples:\nInput: "Shipping was fast!" → Output: positive\nInput: "Product broke after a day." → Output: negative\nInput: "It's okay, nothing special." → Output: neutral\n\nNow classify: "{new_review_here}"`}</code>
+                <button className="copy-btn" onClick={(e) => handleCopy(`Classify customer sentiment. Examples:\nInput: "Shipping was fast!" → Output: positive\nInput: "Product broke after a day." → Output: negative\nInput: "It's okay, nothing special." → Output: neutral\n\nNow classify: "{new_review_here}"`, e)}>Copy</button>
               </div>
               <div style={{ background: 'var(--amber-lt)', border: '1px solid rgba(138,90,0,0.2)', borderRadius: 'var(--radius)', padding: '1rem' }}>
                 <p style={{ fontSize: '0.83rem', color: 'var(--amber)', lineHeight: 1.6 }}>
@@ -255,27 +289,22 @@ const ModelDetailModal = ({ isOpen, onClose, model }) => {
           <div className="modal-panel on">
             <h4 style={{ fontFamily: 'Syne, sans-serif', fontSize: '1rem', fontWeight: 700, marginBottom: '0.5rem' }}>Create an Agent with {model.name}</h4>
             <p style={{ fontSize: '0.85rem', color: 'var(--text2)', marginBottom: '1.25rem' }}>Follow these steps to build a powerful AI agent in under 10 minutes.</p>
-            <div className="agent-step">
-              <div className="agent-step-num">1</div>
-              <div className="agent-step-content">
-                <h5>Define your agent's purpose</h5>
-                <p>Clearly state what your agent should do. Example: "A customer support agent that answers product questions, escalates billing issues, and creates Jira tickets for bugs."</p>
+            {[
+              { n: 1, title: "Define your agent's purpose", body: 'Clearly state what your agent should do. Example: "A customer support agent that answers product questions, escalates billing issues, and creates Jira tickets for bugs."' },
+              { n: 2, title: 'Write the system prompt', body: "The system prompt defines the agent's persona, scope, and behaviour. Be explicit about what the agent should and shouldn't do. Include tone, response length, and escalation rules." },
+              { n: 3, title: 'Connect tools & APIs', body: `Equip your agent with tools: web search, database lookup, email sender, calendar API, Slack webhook. ${model.name} supports function calling — define your tools in JSON schema format.` },
+              { n: 4, title: 'Set up memory', body: 'Configure short-term (conversation history) and long-term memory (vector store). This lets the agent remember user preferences and important context across sessions.' },
+              { n: 5, title: 'Test & iterate', body: 'Run the agent through 20+ test scenarios covering edge cases. Refine the system prompt based on failures. Use our Agent Playground to debug and tune before deployment.' },
+              { n: 6, title: 'Deploy & monitor', body: 'Get a shareable endpoint or embed widget. Monitor performance in the NexusAI dashboard — track response quality, latency, token usage, and user satisfaction scores in real time.' },
+            ].map(step => (
+              <div key={step.n} className="agent-step">
+                <div className="agent-step-num">{step.n}</div>
+                <div className="agent-step-content">
+                  <h5>{step.title}</h5>
+                  <p>{step.body}</p>
+                </div>
               </div>
-            </div>
-            <div className="agent-step">
-              <div className="agent-step-num">2</div>
-              <div className="agent-step-content">
-                <h5>Write the system prompt</h5>
-                <p>The system prompt defines the agent's persona, scope, and behaviour. Be explicit about what the agent should and shouldn't do. Include tone, response length, and escalation rules.</p>
-              </div>
-            </div>
-            <div className="agent-step">
-              <div className="agent-step-num">3</div>
-              <div className="agent-step-content">
-                <h5>Connect tools & APIs</h5>
-                <p>Equip your agent with tools: web search, database lookup, email sender, calendar API, Slack webhook. {model.name} supports function calling — define your tools in JSON schema format.</p>
-              </div>
-            </div>
+            ))}
             <div style={{ marginTop: '1.5rem', display: 'flex', gap: '8px' }}>
               <button className="btn btn-primary" style={{ fontSize: '0.85rem', padding: '0.6rem 1.5rem' }} onClick={onClose}>Open Agent Builder →</button>
               <button className="btn btn-ghost" style={{ fontSize: '0.85rem', padding: '0.6rem 1.25rem' }} onClick={onClose}>Ask the Hub</button>

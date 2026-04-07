@@ -455,9 +455,62 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:1rem 2
 .compact-reco-actions .btn{padding:0.38rem 0.8rem;font-size:0.8rem}
 
 /* RIGHT PANEL */
-.rpanel{width:272px;flex-shrink:0;background:var(--white);border-left:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
+.rpanel{width:272px;flex-shrink:0;background:var(--white);border-left:1px solid var(--border);overflow:hidden;display:flex;flex-direction:column}
 .rp-sec{padding:1rem;border-bottom:1px solid var(--border)}
 .rp-lbl{font-size:0.68rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);font-weight:600;margin-bottom:0.75rem}
+
+/* Active Model Card */
+.rp-am-head{display:flex;align-items:center;gap:9px;margin-bottom:0.6rem}
+.rp-am-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;border:1px solid var(--border)}
+.rp-am-name{font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;letter-spacing:-0.02em;line-height:1.2}
+.rp-am-org{font-size:0.7rem;color:var(--text3);margin-top:1px}
+.rp-am-live{margin-left:auto;font-size:0.65rem;font-weight:700;color:var(--teal);background:var(--teal-lt);border:1px solid rgba(10,94,73,0.2);border-radius:2rem;padding:0.18rem 0.55rem;flex-shrink:0}
+.rp-am-desc{font-size:0.77rem;color:var(--text2);line-height:1.5;margin-bottom:0.75rem}
+.rp-am-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:0.75rem}
+.rp-am-stat{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:0.4rem 0.3rem;text-align:center}
+.rp-am-stat strong{display:block;font-size:0.82rem;font-weight:700;color:var(--text);line-height:1.2}
+.rp-am-stat span{font-size:0.6rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em}
+.rp-am-btns{display:flex;gap:6px}
+.rp-am-btn{flex:1;padding:0.42rem 0.5rem;font-size:0.74rem;font-weight:500;border-radius:8px;cursor:pointer;font-family:inherit;transition:all 0.15s;text-align:center}
+.rp-am-btn.outline{background:none;border:1px solid var(--border2);color:var(--text2)}
+.rp-am-btn.outline:hover{border-color:var(--blue);color:var(--blue)}
+.rp-am-btn.filled{background:var(--accent-lt);border:1px solid var(--accent-border);color:var(--accent)}
+.rp-am-btn.filled:hover{background:var(--accent);color:white}
+
+/* Usage Overview */
+.rp-usage{display:none;padding:1rem;border-bottom:1px solid var(--border)}
+.rp-usage.show{display:block}
+.rp-usage-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:0.75rem}
+.rp-usage-stat{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:0.55rem 0.4rem;text-align:center}
+.rp-usage-stat .u-label{font-size:0.62rem;color:var(--text3);text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px}
+.rp-usage-stat .u-val{font-size:0.9rem;font-weight:700;color:var(--text);font-family:'Syne',sans-serif;line-height:1.2}
+.rp-spark-wrap{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:0.6rem 0.75rem;overflow:hidden}
+.rp-spark{display:flex;align-items:flex-end;gap:2px;height:44px}
+.rp-spark-bar{flex:1;background:var(--blue);border-radius:2px 2px 0 0;opacity:0.7;min-width:4px;transition:height 0.4s ease}
+
+/* Quick Actions */
+.qa-grid{display:flex;flex-direction:column;gap:4px}
+.qa-group-label{font-size:0.62rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:var(--text3);padding:2px 0 4px}
+.qa-btn{
+  display:flex;align-items:center;gap:9px;
+  text-align:left;width:100%;
+  padding:0.45rem 0.65rem;
+  border:1px solid var(--border);border-radius:8px;
+  background:var(--white);cursor:pointer;
+  font-size:0.8rem;font-family:inherit;color:var(--text);
+  transition:all 0.15s;
+}
+.qa-btn:hover{color:var(--accent);border-color:var(--accent-border);background:var(--accent-lt)}
+.qa-icon-box{
+  width:26px;height:26px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:0.9rem;flex-shrink:0;line-height:1;
+}
+.qa-icon{font-size:0.95rem;flex-shrink:0;line-height:1}
+.qa-text{line-height:1.3;font-size:0.8rem;color:var(--text)}
+.rp-qa-sec{flex:1;overflow-y:auto;padding-bottom:1rem}
+
+/* Legacy card styles kept for compat */
 .active-mcard{background:var(--bg);border:1px solid var(--border2);border-radius:var(--radius);padding:0.875rem}
 .am-hd{display:flex;align-items:center;gap:8px;margin-bottom:0.5rem}
 .am-hd h4{font-size:0.875rem;font-weight:600;font-family:'Syne',sans-serif}

@@ -12,6 +12,7 @@ import { nxToast } from '../utils/helpers';
 const AppPage = ({ activeTab, setActiveTab, goHome, goSignIn, isAuthenticated, onLogout, currentModelId, setCurrentModelId, searchQuery, setSearchQuery, attachedFiles, setAttachedFiles, isObDone, onboardingAnswers }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedModel, setSelectedModel] = useState(null);
+  const [modalInitialTab, setModalInitialTab] = useState('overview');
   const [chatModels, setChatModels] = useState(MODELS);
 
   useEffect(() => {
@@ -42,9 +43,10 @@ const AppPage = ({ activeTab, setActiveTab, goHome, goSignIn, isAuthenticated, o
     }
   }, [activeTab, isAuthenticated, setActiveTab, goSignIn]);
 
-  const openModal = (id) => {
+  const openModal = (id, tab) => {
     const model = chatModels.find(m => m.id === id) || MODELS.find(m => m.id === id);
     setSelectedModel(model);
+    setModalInitialTab(tab || 'overview');
     setIsModalOpen(true);
   };
 
@@ -74,6 +76,7 @@ const AppPage = ({ activeTab, setActiveTab, goHome, goSignIn, isAuthenticated, o
             isObDone={isObDone}
             onboardingAnswers={onboardingAnswers}
             openModal={openModal}
+            setActiveTab={setActiveTab}
           />
         )}
         
@@ -98,7 +101,8 @@ const AppPage = ({ activeTab, setActiveTab, goHome, goSignIn, isAuthenticated, o
       <ModelDetailModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
-        model={selectedModel} 
+        model={selectedModel}
+        initialTab={modalInitialTab}
       />
     </div>
   );

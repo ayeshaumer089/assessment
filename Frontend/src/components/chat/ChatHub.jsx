@@ -6,7 +6,7 @@ import { nxToast } from '../../utils/helpers';
 import { recordScreen, recordUserVideo } from '../../utils/media';
 import { getChatResponse } from '../../services/chat';
 
-const ChatHub = ({ models = [], searchQuery, setSearchQuery, attachedFiles, setAttachedFiles, currentModelId, setCurrentModelId, isObDone, onboardingAnswers, openModal }) => {
+const ChatHub = ({ models = [], searchQuery, setSearchQuery, attachedFiles, setAttachedFiles, currentModelId, setCurrentModelId, isObDone, onboardingAnswers, openModal, setActiveTab }) => {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -753,7 +753,13 @@ const ChatHub = ({ models = [], searchQuery, setSearchQuery, attachedFiles, setA
         </div>
       </main>
 
-      <RightPanel activeModel={activeModel} onboardingAnswers={localAnswers} openModal={openModal} />
+      <RightPanel
+        activeModel={activeModel}
+        onboardingAnswers={localAnswers}
+        openModal={openModal}
+        onSendMessage={handleSend}
+        onSwitchTab={(tab) => setActiveTab && setActiveTab(tab)}
+      />
     </div>
   );
 };
